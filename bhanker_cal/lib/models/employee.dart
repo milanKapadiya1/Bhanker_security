@@ -10,4 +10,21 @@ class Employee {
     required this.role,
     required this.monthlySalary,
   });
+  factory Employee.fromJson(Map<String, dynamic> json) {
+    return Employee(
+      id: json['id'],
+      name: json['name'],
+      role: json['role'],
+      monthlySalary: json['monthlySalary'].toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'role': role,
+      'monthlySalary': monthlySalary,
+    };
+  }
 }

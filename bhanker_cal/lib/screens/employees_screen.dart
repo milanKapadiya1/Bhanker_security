@@ -227,106 +227,108 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   Widget build(BuildContext context) {
     final employeeService = EmployeeService();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Employee Management'),
-      ),
-      drawer: const AppDrawer(),
-      body: ListenableBuilder(
-        listenable: employeeService,
-        builder: (context, child) {
-          // Filter employees based on search query
-          final allEmployees = employeeService.employees;
-          final employees = _searchQuery.isEmpty
-              ? allEmployees
-              : allEmployees.where((employee) {
-                  final query = _searchQuery.toLowerCase();
-                  return employee.name.toLowerCase().contains(query) ||
-                      (employee.id?.toLowerCase().contains(query) ?? false) ||
-                      employee.role.toLowerCase().contains(query);
-                }).toList();
-
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(16.0.r),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Employee\nManagement',
-                  style: TextStyle(
-                      fontSize: 28.sp,
-                      fontWeight: FontWeight.bold,
-                      height: 1.2),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  'Manage employee information and default salaries',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                SizedBox(height: 24.h),
-
-                // Add Employee Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _showAddEmployeeDialog(context),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Employee'),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Employee Management'),
+        ),
+        drawer: const AppDrawer(),
+        body: ListenableBuilder(
+          listenable: employeeService,
+          builder: (context, child) {
+            // Filter employees based on search query
+            final allEmployees = employeeService.employees;
+            final employees = _searchQuery.isEmpty
+                ? allEmployees
+                : allEmployees.where((employee) {
+                    final query = _searchQuery.toLowerCase();
+                    return employee.name.toLowerCase().contains(query) ||
+                        (employee.id?.toLowerCase().contains(query) ?? false) ||
+                        employee.role.toLowerCase().contains(query);
+                  }).toList();
+      
+            return SingleChildScrollView(
+              padding: EdgeInsets.all(16.0.r),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Employee\nManagement',
+                    style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    'Manage employee information and default salaries',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  SizedBox(height: 24.h),
+      
+                  // Add Employee Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showAddEmployeeDialog(context),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Employee'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 24.h),
-
-                // Search Bar
-                TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
-                    hintText: 'Search employees by name, ID, or role',
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 24.h),
-
-                // Employee List
-                if (employees.isEmpty)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: Text('No employees found'),
-                    ),
-                  )
-                else
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: employees.length,
-                    separatorBuilder: (context, index) =>
-                        SizedBox(height: 16.h),
-                    itemBuilder: (context, index) {
-                      final employee = employees[index];
-                      return _buildEmployeeCard(context, employee);
+                  SizedBox(height: 24.h),
+      
+                  // Search Bar
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
                     },
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      hintText: 'Search employees by name, ID, or role',
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                    ),
                   ),
-              ],
-            ),
-          );
-        },
+                  SizedBox(height: 24.h),
+      
+                  // Employee List
+                  if (employees.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: Text('No employees found'),
+                      ),
+                    )
+                  else
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: employees.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 16.h),
+                      itemBuilder: (context, index) {
+                        final employee = employees[index];
+                        return _buildEmployeeCard(context, employee);
+                      },
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

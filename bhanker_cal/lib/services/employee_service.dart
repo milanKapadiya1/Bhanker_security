@@ -1,56 +1,62 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/employee.dart';
 
 class EmployeeService extends ChangeNotifier {
   static final EmployeeService _instance = EmployeeService._internal();
+  static const String _storageKey = 'employees_data';
 
   factory EmployeeService() {
     return _instance;
   }
 
-  EmployeeService._internal();
+  EmployeeService._internal() {
+    _loadEmployees();
+  }
 
-  final List<Employee> _employees = [
-    Employee(
-        id: 'EMP001',
-        name: 'John Doe',
-        role: 'Software Engineer',
-        monthlySalary: 50000),
-    Employee(
-        id: 'EMP002',
-        name: 'Sarah Johnson',
-        role: 'HR Manager',
-        monthlySalary: 4800),
-    Employee(
-        id: 'EMP003',
-        name: 'Michael Davis',
-        role: 'Financial Analyst',
-        monthlySalary: 4500),
-    Employee(
-        id: 'EMP004',
-        name: 'David Brown',
-        role: 'Developer',
-        monthlySalary: 5000),
-  ];
+  List<Employee> _employees = [];
 
   List<Employee> get employees => List.unmodifiable(_employees);
 
-  void addEmployee(Employee employee) {
-    _employees.add(employee);
-    notifyListeners();
-  }
+  Future<void> _loadEmployees() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? employeesJson = prefs.getString(_storageKey);
 
-  void updateEmployee(Employee oldEmployee, Employee newEmployee) {
-    final index = _employees.indexOf(oldEmployee);
-    if (index != -1) {
-      _employees[index] = newEmployee;
+    if (employeesJson != null) {
+      final List<dynamic> decodedList = jsonDecode(employeesJson);
+      _employees = decodedList.map((item) => Employee.fromJson(item)).toList();
       notifyListeners();
     }
   }
 
-  void deleteEmployee(Employee employee) {
+  Future<void> _saveEmployees() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String encodedList =
+        jsonEncode(_employees.map((e) => e.toJson()).toList());
+    await prefs.setString(_storageKey, encodedList);
+  }
+
+  Future<void> addEmployee(Employee employee) async {
+    _employees.add(employee);
+    notifyListeners();
+    await _saveEmployees();
+  }
+
+  Future<void> updateEmployee(
+      Employee oldEmployee, Employee newEmployee) async {
+    final index = _employees.indexOf(oldEmployee);
+    if (index != -1) {
+      _employees[index] = newEmployee;
+      notifyListeners();
+      await _saveEmployees();
+    }
+  }
+
+  Future<void> deleteEmployee(Employee employee) async {
     _employees.remove(employee);
     notifyListeners();
+    await _saveEmployees();
   }
 
   List<Employee> search(String query) {
