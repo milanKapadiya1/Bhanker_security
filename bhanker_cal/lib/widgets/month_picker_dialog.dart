@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
 
 class MonthPickerDialog extends StatefulWidget {
@@ -24,56 +25,56 @@ class _MonthPickerDialogState extends State<MonthPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
       child: Container(
-        width: 320,
-        padding: const EdgeInsets.all(16),
+        width: 320.w,
+        padding: EdgeInsets.all(16.r),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Year Selector
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(4.r),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     '$_selectedYear',
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w500),
+                    style:
+                        TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
                   ),
                   // Simple year navigation for now, or could be a dropdown
                   Row(
                     children: [
                       InkWell(
                         onTap: () => setState(() => _selectedYear--),
-                        child: const Icon(Icons.chevron_left, size: 20),
+                        child: Icon(Icons.chevron_left, size: 20.sp),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       InkWell(
                         onTap: () => setState(() => _selectedYear++),
-                        child: const Icon(Icons.chevron_right, size: 20),
+                        child: Icon(Icons.chevron_right, size: 20.sp),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Month Grid
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 childAspectRatio: 1.5,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
+                crossAxisSpacing: 8.w,
+                mainAxisSpacing: 8.h,
               ),
               itemCount: 12,
               itemBuilder: (context, index) {
@@ -91,7 +92,7 @@ class _MonthPickerDialogState extends State<MonthPickerDialog> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isSelected ? Colors.blue : Colors.transparent,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(4.r),
                     ),
                     child: Text(
                       monthName,
@@ -105,7 +106,7 @@ class _MonthPickerDialogState extends State<MonthPickerDialog> {
                 );
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Actions
             Row(
@@ -135,8 +136,8 @@ class _MonthPickerDialogState extends State<MonthPickerDialog> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    minimumSize: const Size(0, 36),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    minimumSize: Size(0, 36.h),
                   ),
                   child: const Text('OK'),
                 ),

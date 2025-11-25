@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/employee.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_drawer.dart';
@@ -246,21 +247,23 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 }).toList();
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0.r),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Employee\nManagement',
                   style: TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.bold, height: 1.2),
+                      fontSize: 28.sp,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   'Manage employee information and default salaries',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
 
                 // Add Employee Button
                 SizedBox(
@@ -270,11 +273,11 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     icon: const Icon(Icons.add),
                     label: const Text('Add Employee'),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
 
                 // Search Bar
                 TextField(
@@ -286,19 +289,19 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search),
                     hintText: 'Search employees by name, ID, or role',
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                       borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                       borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
 
                 // Employee List
                 if (employees.isEmpty)
@@ -314,7 +317,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: employees.length,
                     separatorBuilder: (context, index) =>
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
                     itemBuilder: (context, index) {
                       final employee = employees[index];
                       return _buildEmployeeCard(context, employee);
@@ -331,26 +334,26 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   Widget _buildEmployeeCard(BuildContext context, Employee employee) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 CircleAvatar(
-                  radius: 24,
+                  radius: 24.r,
                   backgroundColor: AppTheme.primaryColor,
                   child: const Icon(Icons.person_outline, color: Colors.white),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         employee.name,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16.sp, fontWeight: FontWeight.bold),
                       ),
                       if (employee.id != null && employee.id!.isNotEmpty)
                         Text(
@@ -366,14 +369,14 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     IconButton(
                       onPressed: () =>
                           _showEditEmployeeDialog(context, employee),
-                      icon: const Icon(Icons.edit_outlined,
-                          size: 20, color: Colors.grey),
+                      icon: Icon(Icons.edit_outlined,
+                          size: 20.sp, color: Colors.grey),
                       tooltip: 'Edit Employee',
                     ),
                     IconButton(
                       onPressed: () => _deleteEmployee(context, employee),
-                      icon: const Icon(Icons.delete_outline,
-                          size: 20, color: Colors.red),
+                      icon: Icon(Icons.delete_outline,
+                          size: 20.sp, color: Colors.red),
                       tooltip: 'Delete Employee',
                     ),
                   ],
@@ -384,8 +387,8 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
             Row(
               children: [
                 Icon(Icons.business_outlined,
-                    size: 16, color: AppTheme.textSecondary),
-                const SizedBox(width: 8),
+                    size: 16.sp, color: AppTheme.textSecondary),
+                SizedBox(width: 8.w),
                 Text(
                   employee.role,
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -396,25 +399,24 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
             // Role Badge (e.g., HR) - Hardcoded for now based on image
             if (employee.role.contains('HR'))
               Container(
-                margin: const EdgeInsets.only(top: 4, bottom: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                margin: EdgeInsets.only(top: 4.h, bottom: 12.h),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: Colors.purple.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
-                child: const Text(
+                child: Text(
                   'HR',
                   style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.sp,
                       color: Colors.purple,
                       fontWeight: FontWeight.bold),
                 ),
               ),
 
-            if (!employee.role.contains('HR')) const SizedBox(height: 12),
-
+            if (!employee.role.contains('HR')) SizedBox(height: 12.h),
             Divider(color: Colors.grey.shade100),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             RichText(
               text: TextSpan(
                 children: [
@@ -423,7 +425,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                         '₹${NumberFormat('#,##0').format(employee.monthlySalary)}',
                     style: TextStyle(
                       color: Colors.green.shade700,
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -431,7 +433,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     text: ' / month',
                     style: TextStyle(
                       color: AppTheme.textSecondary,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                     ),
                   ),
                 ],

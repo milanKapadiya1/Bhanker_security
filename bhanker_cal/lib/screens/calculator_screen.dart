@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/employee.dart';
 import '../models/calculation_result.dart';
 import '../theme/app_theme.dart';
@@ -154,16 +155,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 _history.clear();
               });
             },
-            icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('Reset All'),
+            icon: Icon(Icons.refresh, size: 18.sp),
+            label: Text('Reset All', style: TextStyle(fontSize: 14.sp)),
             style: TextButton.styleFrom(foregroundColor: AppTheme.textPrimary),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
         ],
       ),
       drawer: const AppDrawer(),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -171,36 +172,36 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Card(
               color: const Color(0xFFEEF2FF), // Light indigo background
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0.r),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         Icon(Icons.settings_outlined,
-                            color: AppTheme.primaryColor, size: 20),
-                        const SizedBox(width: 8),
-                        const Text(
+                            color: AppTheme.primaryColor, size: 20.sp),
+                        SizedBox(width: 8.w),
+                        Text(
                           'Month Settings',
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16.sp, fontWeight: FontWeight.bold),
                         ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10.w, vertical: 4.h),
                           decoration: BoxDecoration(
                             color: AppTheme.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Text(
                             'One-time setup',
                             style: TextStyle(
                               color: AppTheme.primaryColor,
-                              fontSize: 12,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -227,11 +228,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16.w, vertical: 12.h),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                           border: Border.all(color: Colors.grey.shade200),
                         ),
                         child: Row(
@@ -239,10 +240,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           children: [
                             Text(
                               DateFormat('MMMM, yyyy').format(_selectedDate),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                  fontSize: 16.sp, fontWeight: FontWeight.w500),
                             ),
-                            const Icon(Icons.calendar_today_outlined, size: 20),
+                            Icon(Icons.calendar_today_outlined, size: 20.sp),
                           ],
                         ),
                       ),
@@ -251,7 +252,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     Text(
                       'Total days will be set automatically based on your selection.',
                       style: TextStyle(
-                          fontSize: 12, color: AppTheme.textSecondary),
+                          fontSize: 12.sp, color: AppTheme.textSecondary),
                     ),
                   ],
                 ),
@@ -260,8 +261,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             const SizedBox(height: 24),
 
             // Employee Search (Autocomplete)
-            const Text('Select Employee',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            Text('Select Employee',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp)),
             const SizedBox(height: 8),
             Autocomplete<Employee>(
               key: _autocompleteKey,
@@ -339,11 +340,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   icon: const Icon(Icons.person_add_alt_1),
                   label: const Text('Save New Employee'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
                     side: const BorderSide(color: Colors.blue),
                     foregroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(8.r)),
                   ),
                 ),
               ),
@@ -358,11 +359,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 icon: const Icon(Icons.calculate),
                 label: const Text('Calculate Salary'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  textStyle:
+                      TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8.r)),
                 ),
               ),
             ),
@@ -374,10 +375,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               child: OutlinedButton(
                 onPressed: _clearForm,
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   side: BorderSide(color: Colors.grey.shade300),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8.r)),
                   foregroundColor: AppTheme.textPrimary,
                 ),
                 child: const Text('Clear Form',
@@ -390,18 +391,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               const SizedBox(height: 32),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(24.r),
                 decoration: BoxDecoration(
                   color: const Color(0xFFECFDF5), // Mint green background
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(color: const Color(0xFFD1FAE5)),
                 ),
                 child: Column(
                   children: [
-                    const Text(
+                    Text(
                       'Salary Calculation',
                       style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF064E3B)),
                     ),
@@ -419,8 +420,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     const SizedBox(height: 4),
                     Text(
                       '₹${NumberFormat('#,##0.00').format(_currentResult!.perDayAmount)}',
-                      style: const TextStyle(
-                          fontSize: 24,
+                      style: TextStyle(
+                          fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF111827)),
                     ),
@@ -428,9 +429,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.calendar_today,
-                            size: 16, color: Color(0xFF065F46)),
-                        const SizedBox(width: 8),
+                        Icon(Icons.calendar_today,
+                            size: 16.sp, color: Color(0xFF065F46)),
+                        SizedBox(width: 8.w),
                         const Text('Attendance',
                             style: TextStyle(
                                 color: Color(0xFF065F46),
@@ -440,18 +441,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     const SizedBox(height: 4),
                     Text(
                       '${_currentResult!.presentDays}/${_currentResult!.totalDays}',
-                      style: const TextStyle(
-                          fontSize: 24,
+                      style: TextStyle(
+                          fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF111827)),
                     ),
                     const SizedBox(height: 24),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         border: Border.all(color: const Color(0xFFD1FAE5)),
                       ),
                       child: Column(
@@ -465,8 +466,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           const SizedBox(height: 8),
                           Text(
                             '₹${NumberFormat('#,##0').format(_currentResult!.calculatedSalary)}',
-                            style: const TextStyle(
-                              fontSize: 36,
+                            style: TextStyle(
+                              fontSize: 36.sp,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF059669), // Green text
                             ),
@@ -484,46 +485,51 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               const SizedBox(height: 40),
               Card(
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(16.r)),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16.0.r),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Calculation',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              const Text(
-                                'History',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${_history.length} calculations • Total: ₹${NumberFormat('#,##0').format(_history.fold(0.0, (sum, item) => sum + item.calculatedSalary))}',
-                                style: TextStyle(
-                                    color: AppTheme.textSecondary,
-                                    fontSize: 13),
-                              ),
-                            ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Calculation',
+                                  style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  'History',
+                                  style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  '${_history.length} calculations • Total: ₹${NumberFormat('#,##0').format(_history.fold(0.0, (sum, item) => sum + item.calculatedSalary))}',
+                                  style: TextStyle(
+                                      color: AppTheme.textSecondary,
+                                      fontSize: 13.sp),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
                           ),
                           Row(
                             children: [
                               OutlinedButton.icon(
                                 onPressed: () {}, // Placeholder
-                                icon: const Icon(Icons.copy, size: 16),
+                                icon: Icon(Icons.copy, size: 16.sp),
                                 label: const Text('Copy'),
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 12.w),
                                   minimumSize: Size.zero,
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
@@ -532,11 +538,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               const SizedBox(width: 8),
                               OutlinedButton.icon(
                                 onPressed: () {}, // Placeholder
-                                icon: const Icon(Icons.print, size: 16),
+                                icon: Icon(Icons.print, size: 16.sp),
                                 label: const Text('Print'),
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 12.w),
                                   minimumSize: Size.zero,
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
@@ -564,11 +570,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   children: [
                                     CircleAvatar(
                                       backgroundColor: AppTheme.primaryColor,
-                                      radius: 20,
-                                      child: const Icon(Icons.person_outline,
-                                          color: Colors.white, size: 20),
+                                      radius: 20.r,
+                                      child: Icon(Icons.person_outline,
+                                          color: Colors.white, size: 20.sp),
                                     ),
-                                    const SizedBox(width: 12),
+                                    SizedBox(width: 12.w),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
@@ -576,16 +582,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         children: [
                                           Text(
                                             item.employeeName,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 16),
+                                                fontSize: 16.sp),
                                           ),
                                           Text(
                                             DateFormat('yyyy-MM')
                                                 .format(item.date),
                                             style: TextStyle(
                                                 color: AppTheme.textSecondary,
-                                                fontSize: 12),
+                                                fontSize: 12.sp),
                                           ),
                                         ],
                                       ),
@@ -596,41 +602,41 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                       children: [
                                         Text(
                                           '₹${NumberFormat('#,##0.###').format(item.calculatedSalary)}',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                            color: Color(0xFF059669),
+                                            fontSize: 18.sp,
+                                            color: const Color(0xFF059669),
                                           ),
                                         ),
                                         Text(
                                           '${item.presentDays}/${item.totalDays} days',
                                           style: TextStyle(
                                               color: AppTheme.textSecondary,
-                                              fontSize: 12),
+                                              fontSize: 12.sp),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
+                                SizedBox(height: 8.h),
                                 Row(
                                   children: [
                                     Text(
                                       'Monthly: ₹${NumberFormat('#,##0').format(item.monthlySalary)}',
                                       style: TextStyle(
                                           color: AppTheme.textSecondary,
-                                          fontSize: 13),
+                                          fontSize: 13.sp),
                                     ),
-                                    const SizedBox(width: 16),
+                                    SizedBox(width: 16.w),
                                     Icon(Icons.calendar_today,
-                                        size: 12,
+                                        size: 12.sp,
                                         color: AppTheme.textSecondary),
-                                    const SizedBox(width: 4),
+                                    SizedBox(width: 4.w),
                                     Text(
                                       'Per day: ₹${NumberFormat('#,##0.00').format(item.perDayAmount)}',
                                       style: TextStyle(
                                           color: AppTheme.textSecondary,
-                                          fontSize: 13),
+                                          fontSize: 13.sp),
                                     ),
                                   ],
                                 ),
@@ -644,7 +650,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
             ],
-            const SizedBox(height: 40),
+            SizedBox(height: 40.h),
           ],
         ),
       ),

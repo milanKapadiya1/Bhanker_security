@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'theme/app_theme.dart';
 import 'screens/calculator_screen.dart';
@@ -14,15 +15,22 @@ class BhankerCalApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BhankerCal',
-      theme: AppTheme.lightTheme,
-      debugShowCheckedModeBanner: false,
-      initialRoute: CalculatorScreen.routeName,
-      routes: {
-        CalculatorScreen.routeName: (context) => const CalculatorScreen(),
-        EmployeesScreen.routeName: (context) => const EmployeesScreen(),
-        HistoryScreen.routeName: (context) => const HistoryScreen(),
+    return ScreenUtilInit(
+      designSize: const Size(360, 690), // Standard Android design size
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'BhankerCal',
+          theme: AppTheme.lightTheme,
+          debugShowCheckedModeBanner: false,
+          initialRoute: CalculatorScreen.routeName,
+          routes: {
+            CalculatorScreen.routeName: (context) => const CalculatorScreen(),
+            EmployeesScreen.routeName: (context) => const EmployeesScreen(),
+            HistoryScreen.routeName: (context) => const HistoryScreen(),
+          },
+        );
       },
     );
   }

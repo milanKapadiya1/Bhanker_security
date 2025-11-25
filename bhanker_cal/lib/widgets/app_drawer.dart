@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../screens/calculator_screen.dart';
 import '../screens/employees_screen.dart';
 import '../screens/history_screen.dart';
@@ -16,7 +17,7 @@ class AppDrawer extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
+            padding: EdgeInsets.fromLTRB(24.w, 60.h, 24.w, 24.h),
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
@@ -25,18 +26,18 @@ class AppDrawer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8.r),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryColor,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.calculate_outlined,
                     color: Colors.white,
-                    size: 32,
+                    size: 32.sp,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 Text(
                   'BhankerCal',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -44,7 +45,7 @@ class AppDrawer extends StatelessWidget {
                         color: AppTheme.textPrimary,
                       ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   'Salary Calculator',
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -52,9 +53,9 @@ class AppDrawer extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -66,7 +67,7 @@ class AppDrawer extends StatelessWidget {
                         letterSpacing: 1.2,
                       ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _buildDrawerItem(
                   context,
                   icon: Icons.calculate_outlined,
@@ -104,10 +105,10 @@ class AppDrawer extends StatelessWidget {
     required bool isSelected,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
         color: isSelected ? Colors.grey.shade100 : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
       ),
       child: ListTile(
         leading: Icon(
@@ -129,7 +130,7 @@ class AppDrawer extends StatelessWidget {
           }
         },
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
         ),
       ),
     );

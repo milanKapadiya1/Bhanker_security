@@ -37,6 +37,7 @@ dependencies:
   google_fonts: ^6.3.0
   intl: ^0.20.2
   provider: ^6.1.5+1
+  flutter_screenutil: ^5.9.3
 
 dev_dependencies:
   flutter_test:
@@ -48,6 +49,14 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.4.4
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/modern_splash_logo.png
+  android_12:
+    image: assets/images/modern_splash_logo.png
+    icon_background_color: "#FFFFFF"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
