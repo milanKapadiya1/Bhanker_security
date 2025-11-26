@@ -7,6 +7,7 @@ import '../theme/app_theme.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/month_picker_dialog.dart';
 import '../services/employee_service.dart';
+import '../services/salary_service.dart';
 
 class CalculatorScreen extends StatefulWidget {
   static const routeName = '/calculator';
@@ -26,13 +27,32 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String _nameInput = '';
 
   // History List
-  final List<CalculationResult> _history = [];
+  List<CalculationResult> _history = [];
 
-  // Employee Service
+  // Services
   final _employeeService = EmployeeService();
+  final _salaryService = SalaryService();
 
   // Key to reset Autocomplete
   Key _autocompleteKey = UniqueKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSession();
+  }
+
+  Future<void> _loadSession() async {
+    final session = await _salaryService.getSession();
+    if (mounted) {
+      setState(() {
+        _history = session;
+        if (_history.isNotEmpty) {
+          _currentResult = _history.first;
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -74,7 +94,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  void _calculateSalary() {
+  Future<void> _calculateSalary() async {
     final double? salary = double.tryParse(_salaryController.text);
     final int? days = int.tryParse(_daysController.text);
 
@@ -101,12 +121,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
       final employeeName = _selectedEmployee?.name ?? _nameInput;
       final employeeId = _selectedEmployee?.id ?? 'TEMP';
+      final employeeRole = _selectedEmployee?.role ?? 'Employee';
 
       final calculatedSalary = (salary / totalDaysInMonth) * days;
 
       final result = CalculationResult(
         employeeName: employeeName,
         employeeId: employeeId,
+        employeeRole: employeeRole,
         date: _selectedDate,
         monthlySalary: salary,
         presentDays: days,
@@ -118,6 +140,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         _currentResult = result;
         _history.insert(0, result); // Add to top of history
       });
+
+      // Save to persistence (Session only)
+      await _salaryService.saveSession(_history);
+      // await _salaryService.saveCalculation(result); // Removed auto-save to history
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -141,6 +167,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
+  void _resetAll() {
+    setState(() {
+      _selectedDate = DateTime.now();
+      _clearForm();
+      _history.clear();
+    });
+    _salaryService.clearSession();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -149,16 +184,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           title: const Text('Salary Calculator'),
           actions: [
             TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  _selectedDate = DateTime.now();
-                  _clearForm();
-                  _history.clear();
-                });
-              },
+              onPressed: _resetAll,
               icon: Icon(Icons.refresh, size: 18.sp),
               label: Text('Reset All', style: TextStyle(fontSize: 14.sp)),
-              style: TextButton.styleFrom(foregroundColor: AppTheme.textPrimary),
+              style:
+                  TextButton.styleFrom(foregroundColor: AppTheme.textPrimary),
             ),
             SizedBox(width: 8.w),
           ],
@@ -242,7 +272,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               Text(
                                 DateFormat('MMMM, yyyy').format(_selectedDate),
                                 style: TextStyle(
-                                    fontSize: 16.sp, fontWeight: FontWeight.w500),
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w500),
                               ),
                               Icon(Icons.calendar_today_outlined, size: 20.sp),
                             ],
@@ -260,10 +291,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-      
+
               // Employee Search (Autocomplete)
               Text('Select Employee',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp)),
+                  style:
+                      TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp)),
               const SizedBox(height: 8),
               Autocomplete<Employee>(
                 key: _autocompleteKey,
@@ -305,7 +337,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 },
               ),
               const SizedBox(height: 16),
-      
+
               // Monthly Salary
               const Text('Monthly Salary (₹)',
                   style: TextStyle(fontWeight: FontWeight.w600)),
@@ -318,7 +350,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-      
+
               // Present Days
               const Text('Present Days',
                   style: TextStyle(fontWeight: FontWeight.w600)),
@@ -331,7 +363,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-      
+
               // Save New Employee Button (Visible only if new employee)
               if (_selectedEmployee == null && _nameInput.isNotEmpty) ...[
                 SizedBox(
@@ -351,7 +383,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 const SizedBox(height: 16),
               ],
-      
+
               // Calculate Button
               SizedBox(
                 width: double.infinity,
@@ -369,7 +401,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-      
+
               // Clear Form Button
               SizedBox(
                 width: double.infinity,
@@ -386,7 +418,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       style: TextStyle(fontWeight: FontWeight.w600)),
                 ),
               ),
-      
+
               // Result Card (Mint Green)
               if (_currentResult != null) ...[
                 const SizedBox(height: 32),
@@ -480,7 +512,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ),
               ],
-      
+
               // History Section
               if (_history.isNotEmpty) ...[
                 const SizedBox(height: 40),
@@ -525,22 +557,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             Row(
                               children: [
                                 OutlinedButton.icon(
-                                  onPressed: () {}, // Placeholder
-                                  icon: Icon(Icons.copy, size: 16.sp),
-                                  label: const Text('Copy'),
-                                  style: OutlinedButton.styleFrom(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 12.w),
-                                    minimumSize: Size.zero,
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                OutlinedButton.icon(
-                                  onPressed: () {}, // Placeholder
-                                  icon: Icon(Icons.print, size: 16.sp),
-                                  label: const Text('Print'),
+                                  onPressed: () async {
+                                    if (_history.isEmpty) return;
+                                    await _salaryService.saveBatch(_history);
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                        content: Text(
+                                            'Saved all calculations to History!'),
+                                        backgroundColor: Colors.green,
+                                      ));
+                                    }
+                                  },
+                                  icon: Icon(Icons.save_alt, size: 16.sp),
+                                  label: const Text('Save'),
                                   style: OutlinedButton.styleFrom(
                                     padding:
                                         EdgeInsets.symmetric(horizontal: 12.w),
@@ -563,11 +593,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           itemBuilder: (context, index) {
                             final item = _history[index];
                             return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
                               child: Column(
                                 children: [
                                   Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       CircleAvatar(
                                         backgroundColor: AppTheme.primaryColor,
