@@ -8,6 +8,10 @@ class CalculationResult {
   final int totalDays;
   final double calculatedSalary;
 
+  final double wc;
+  final double uniform;
+  final double advance;
+
   CalculationResult({
     required this.employeeName,
     required this.employeeId,
@@ -17,6 +21,9 @@ class CalculationResult {
     required this.presentDays,
     required this.totalDays,
     required this.calculatedSalary,
+    this.wc = 0.0,
+    this.uniform = 0.0,
+    this.advance = 0.0,
   });
 
   double get perDayAmount => monthlySalary / totalDays;
@@ -32,6 +39,9 @@ class CalculationResult {
       presentDays: json['presentDays'],
       totalDays: json['totalDays'],
       calculatedSalary: json['calculatedSalary'].toDouble(),
+      wc: (json['wc'] ?? 0.0).toDouble(),
+      uniform: (json['uniform'] ?? 0.0).toDouble(),
+      advance: (json['advance'] ?? 0.0).toDouble(),
     );
   }
 
@@ -45,6 +55,9 @@ class CalculationResult {
       'presentDays': presentDays,
       'totalDays': totalDays,
       'calculatedSalary': calculatedSalary,
+      'wc': wc,
+      'uniform': uniform,
+      'advance': advance,
     };
   }
 }

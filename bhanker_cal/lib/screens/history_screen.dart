@@ -89,13 +89,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 4: pw.Alignment.centerRight,
                 5: pw.Alignment.centerRight,
               },
-              headers: ['Name', 'ID', 'Role', 'Days', 'Monthly', 'Calculated'],
+              headers: [
+                'Name',
+                'ID',
+                'Role',
+                'Days',
+                'Per Day',
+                'Monthly',
+                'Calculated'
+              ],
               data: items.map((item) {
                 return [
                   item.employeeName,
                   item.employeeId,
                   item.employeeRole,
                   '${item.presentDays}/${item.totalDays}',
+                  NumberFormat('#,##0').format(item.perDayAmount),
                   NumberFormat('#,##0').format(item.monthlySalary),
                   NumberFormat('#,##0').format(item.calculatedSalary),
                 ];
@@ -292,6 +301,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 ),
                                 Text(
                                   '${item.presentDays}/${item.totalDays} days',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                                Text(
+                                  'Per Day: ₹${NumberFormat('#,##0').format(item.perDayAmount)}',
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     color: AppTheme.textSecondary,

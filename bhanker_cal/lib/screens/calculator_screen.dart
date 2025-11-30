@@ -23,6 +23,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Employee? _selectedEmployee;
   final TextEditingController _salaryController = TextEditingController();
   final TextEditingController _daysController = TextEditingController();
+  final TextEditingController _wcController = TextEditingController();
+  final TextEditingController _uniformController = TextEditingController();
+  final TextEditingController _advanceController = TextEditingController();
   CalculationResult? _currentResult;
   String _nameInput = '';
 
@@ -58,6 +61,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void dispose() {
     _salaryController.dispose();
     _daysController.dispose();
+    _wcController.dispose();
+    _uniformController.dispose();
+    _advanceController.dispose();
     super.dispose();
   }
 
@@ -97,6 +103,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Future<void> _calculateSalary() async {
     final double? salary = double.tryParse(_salaryController.text);
     final int? days = int.tryParse(_daysController.text);
+    final double wc = double.tryParse(_wcController.text) ?? 0;
+    final double uniform = double.tryParse(_uniformController.text) ?? 0;
+    final double advance = double.tryParse(_advanceController.text) ?? 0;
 
     // Allow calculation if we have a name (even if not saved as employee yet)
     if (salary != null &&
@@ -123,7 +132,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       final employeeId = _selectedEmployee?.id ?? 'TEMP';
       final employeeRole = _selectedEmployee?.role ?? 'Employee';
 
-      final calculatedSalary = (salary / totalDaysInMonth) * days;
+      final totalDeductions = wc + uniform + advance;
+      final calculatedSalary =
+          ((salary / totalDaysInMonth) * days) - totalDeductions;
 
       final result = CalculationResult(
         employeeName: employeeName,
@@ -134,6 +145,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         presentDays: days,
         totalDays: totalDaysInMonth,
         calculatedSalary: calculatedSalary,
+        wc: wc,
+        uniform: uniform,
+        advance: advance,
       );
 
       setState(() {
@@ -162,6 +176,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _nameInput = '';
       _salaryController.clear();
       _daysController.clear();
+      _wcController.clear();
+      _uniformController.clear();
+      _advanceController.clear();
       _currentResult = null;
       _autocompleteKey = UniqueKey(); // Reset autocomplete
     });
@@ -351,6 +368,66 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Deductions Row (WC, Uniform, Advance)
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('WC',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _wcController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            hintText: 'WC',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Uniform',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _uniformController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            hintText: 'Uniform',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Advance',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _advanceController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            hintText: 'Advance',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
               // Present Days
               const Text('Present Days',
                   style: TextStyle(fontWeight: FontWeight.w600)),
@@ -479,6 +556,80 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF111827)),
                       ),
+                      if (_currentResult!.wc > 0 ||
+                          _currentResult!.uniform > 0 ||
+                          _currentResult!.advance > 0) ...[
+                        const SizedBox(height: 24),
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16.r),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF2F2), // Light red
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(
+                                color: const Color(0xFFFECACA)), // Red 200
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(6.r),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: const Color(0xFFFECACA)),
+                                    ),
+                                    child: Icon(Icons.remove,
+                                        size: 14.sp,
+                                        color: const Color(0xFFB91C1C)),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    'Deductions',
+                                    style: TextStyle(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            const Color(0xFF991B1B)), // Red 800
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    '- ₹${NumberFormat('#,##0').format(_currentResult!.wc + _currentResult!.uniform + _currentResult!.advance)}',
+                                    style: TextStyle(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFFB91C1C)),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12.h),
+                              Divider(
+                                  color:
+                                      const Color(0xFFFECACA).withOpacity(0.5),
+                                  height: 1),
+                              SizedBox(height: 12.h),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  if (_currentResult!.wc > 0)
+                                    _buildDeductionItem(
+                                        'WC', _currentResult!.wc),
+                                  if (_currentResult!.uniform > 0)
+                                    _buildDeductionItem(
+                                        'Uniform', _currentResult!.uniform),
+                                  if (_currentResult!.advance > 0)
+                                    _buildDeductionItem(
+                                        'Advance', _currentResult!.advance),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       Container(
                         width: double.infinity,
@@ -688,6 +839,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDeductionItem(String label, double amount) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: const Color(0xFF7F1D1D), // Red 900
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: 2.h),
+        Text(
+          '₹${NumberFormat('#,##0').format(amount)}',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFFB91C1C), // Red 700
+          ),
+        ),
+      ],
     );
   }
 }
