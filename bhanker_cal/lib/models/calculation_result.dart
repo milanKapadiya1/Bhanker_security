@@ -11,6 +11,7 @@ class CalculationResult {
   final double wc;
   final double uniform;
   final double advance;
+  final bool isSaved;
 
   CalculationResult({
     required this.employeeName,
@@ -24,16 +25,46 @@ class CalculationResult {
     this.wc = 0.0,
     this.uniform = 0.0,
     this.advance = 0.0,
+    this.isSaved = false,
   });
 
   double get perDayAmount => monthlySalary / totalDays;
+
+  CalculationResult copyWith({
+    String? employeeName,
+    String? employeeId,
+    String? employeeRole,
+    DateTime? date,
+    double? monthlySalary,
+    int? presentDays,
+    int? totalDays,
+    double? calculatedSalary,
+    double? wc,
+    double? uniform,
+    double? advance,
+    bool? isSaved,
+  }) {
+    return CalculationResult(
+      employeeName: employeeName ?? this.employeeName,
+      employeeId: employeeId ?? this.employeeId,
+      employeeRole: employeeRole ?? this.employeeRole,
+      date: date ?? this.date,
+      monthlySalary: monthlySalary ?? this.monthlySalary,
+      presentDays: presentDays ?? this.presentDays,
+      totalDays: totalDays ?? this.totalDays,
+      calculatedSalary: calculatedSalary ?? this.calculatedSalary,
+      wc: wc ?? this.wc,
+      uniform: uniform ?? this.uniform,
+      advance: advance ?? this.advance,
+      isSaved: isSaved ?? this.isSaved,
+    );
+  }
 
   factory CalculationResult.fromJson(Map<String, dynamic> json) {
     return CalculationResult(
       employeeName: json['employeeName'],
       employeeId: json['employeeId'],
-      employeeRole: json['employeeRole'] ??
-          'Employee', // Default for backward compatibility
+      employeeRole: json['employeeRole'] ?? 'Employee',
       date: DateTime.parse(json['date']),
       monthlySalary: json['monthlySalary'].toDouble(),
       presentDays: json['presentDays'],
@@ -42,6 +73,7 @@ class CalculationResult {
       wc: (json['wc'] ?? 0.0).toDouble(),
       uniform: (json['uniform'] ?? 0.0).toDouble(),
       advance: (json['advance'] ?? 0.0).toDouble(),
+      isSaved: json['isSaved'] ?? false,
     );
   }
 
@@ -58,6 +90,7 @@ class CalculationResult {
       'wc': wc,
       'uniform': uniform,
       'advance': advance,
+      'isSaved': isSaved,
     };
   }
 }

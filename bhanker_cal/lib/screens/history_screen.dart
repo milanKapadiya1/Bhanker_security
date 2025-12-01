@@ -57,7 +57,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
+        pageFormat: PdfPageFormat.a4.landscape,
         build: (pw.Context context) {
           return [
             pw.Header(
@@ -81,6 +81,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
               headerDecoration:
                   const pw.BoxDecoration(color: PdfColors.grey300),
               cellHeight: 30,
+              columnWidths: {
+                0: const pw.IntrinsicColumnWidth(), // Name
+                1: const pw.IntrinsicColumnWidth(), // ID
+                2: const pw.IntrinsicColumnWidth(), // Role
+                3: const pw.IntrinsicColumnWidth(), // Days
+                4: const pw.IntrinsicColumnWidth(), // Per Day
+                5: const pw.IntrinsicColumnWidth(), // Monthly
+                6: const pw.FlexColumnWidth(), // Deductions
+                7: const pw.IntrinsicColumnWidth(), // Gross Salary
+              },
               cellAlignments: {
                 0: pw.Alignment.centerLeft,
                 1: pw.Alignment.centerLeft,
@@ -88,6 +98,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 3: pw.Alignment.center,
                 4: pw.Alignment.centerRight,
                 5: pw.Alignment.centerRight,
+                6: pw.Alignment.centerLeft, // Deductions
+                7: pw.Alignment.centerRight, // Gross Salary
               },
               headers: [
                 'Name',
@@ -96,9 +108,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 'Days',
                 'Per Day',
                 'Monthly',
-                'Calculated'
+                'Deductions',
+                'Gross Salary'
               ],
               data: items.map((item) {
+                // Format deductions string
+                final List<String> deductions = [];
+                if (item.wc > 0) deductions.add('WC: ${item.wc.toInt()}');
+                if (item.uniform > 0)
+                  deductions.add('Uni: ${item.uniform.toInt()}');
+                if (item.advance > 0)
+                  deductions.add('Adv: ${item.advance.toInt()}');
+                final deductionStr =
+                    deductions.isEmpty ? '-' : deductions.join(', ');
+
                 return [
                   item.employeeName,
                   item.employeeId,
@@ -106,6 +129,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   '${item.presentDays}/${item.totalDays}',
                   NumberFormat('#,##0').format(item.perDayAmount),
                   NumberFormat('#,##0').format(item.monthlySalary),
+                  deductionStr, // New Column Data
                   NumberFormat('#,##0').format(item.calculatedSalary),
                 ];
               }).toList(),
@@ -313,15 +337,49 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     color: AppTheme.textSecondary,
                                   ),
                                 ),
+                                if (item.wc > 0 ||
+                                    item.uniform > 0 ||
+                                    item.advance > 0) ...[
+                                  SizedBox(height: 4.h),
+                                  Wrap(
+                                    spacing: 8.w,
+                                    children: [
+                                      Text(
+                                        'Deductions:',
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: AppTheme.textSecondary,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      if (item.wc > 0)
+                                        Text(
+                                          'WC: ${NumberFormat('#,##0').format(item.wc)}',
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: AppTheme.textSecondary,
+                                          ),
+                                        ),
+                                      if (item.uniform > 0)
+                                        Text(
+                                          'Uniform: ${NumberFormat('#,##0').format(item.uniform)}',
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: AppTheme.textSecondary,
+                                          ),
+                                        ),
+                                      if (item.advance > 0)
+                                        Text(
+                                          'Adv: ${NumberFormat('#,##0').format(item.advance)}',
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: AppTheme.textSecondary,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
                               ],
-                            ),
-                            trailing: Text(
-                              '₹${NumberFormat('#,##0').format(item.calculatedSalary)}',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF059669),
-                              ),
                             ),
                           ),
                         );

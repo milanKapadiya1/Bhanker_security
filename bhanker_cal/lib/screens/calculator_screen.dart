@@ -148,6 +148,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         wc: wc,
         uniform: uniform,
         advance: advance,
+        isSaved: false, // Explicitly mark as unsaved
       );
 
       setState(() {
@@ -710,12 +711,45 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 OutlinedButton.icon(
                                   onPressed: () async {
                                     if (_history.isEmpty) return;
-                                    await _salaryService.saveBatch(_history);
+
+                                    // Filter only unsaved items
+                                    final unsavedItems = _history
+                                        .where((item) => !item.isSaved)
+                                        .toList();
+
+                                    if (unsavedItems.isEmpty) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                          content: Text(
+                                              'No new calculations to save.'),
+                                          backgroundColor: Colors.orange,
+                                        ));
+                                      }
+                                      return;
+                                    }
+
+                                    await _salaryService
+                                        .saveBatch(unsavedItems);
+
+                                    // Mark items as saved in local history
+                                    setState(() {
+                                      _history = _history.map((item) {
+                                        if (!item.isSaved) {
+                                          return item.copyWith(isSaved: true);
+                                        }
+                                        return item;
+                                      }).toList();
+                                    });
+
+                                    // Update session with saved status
+                                    await _salaryService.saveSession(_history);
+
                                     if (context.mounted) {
                                       ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
+                                          .showSnackBar(SnackBar(
                                         content: Text(
-                                            'Saved all calculations to History!'),
+                                            'Saved ${unsavedItems.length} new calculations to History!'),
                                         backgroundColor: Colors.green,
                                       ));
                                     }
@@ -785,7 +819,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                             CrossAxisAlignment.end,
                                         children: [
                                           Text(
-                                            '₹${NumberFormat('#,##0.###').format(item.calculatedSalary)}',
+                                            '₹${NumberFormat('#,##0').format(item.calculatedSalary)}',
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 18.sp,
@@ -824,6 +858,42 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                       ),
                                     ],
                                   ),
+                                  if (item.wc > 0 ||
+                                      item.uniform > 0 ||
+                                      item.advance > 0) ...[
+                                    SizedBox(height: 4.h),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Deductions: ',
+                                          style: TextStyle(
+                                              color: AppTheme.textSecondary,
+                                              fontSize: 13.sp),
+                                        ),
+                                        if (item.wc > 0)
+                                          Text(
+                                            'WC: ${NumberFormat('#,##0').format(item.wc)}  ',
+                                            style: TextStyle(
+                                                color: AppTheme.textSecondary,
+                                                fontSize: 13.sp),
+                                          ),
+                                        if (item.uniform > 0)
+                                          Text(
+                                            'Uniform: ${NumberFormat('#,##0').format(item.uniform)}  ',
+                                            style: TextStyle(
+                                                color: AppTheme.textSecondary,
+                                                fontSize: 13.sp),
+                                          ),
+                                        if (item.advance > 0)
+                                          Text(
+                                            'Adv: ${NumberFormat('#,##0').format(item.advance)}',
+                                            style: TextStyle(
+                                                color: AppTheme.textSecondary,
+                                                fontSize: 13.sp),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
                             );
