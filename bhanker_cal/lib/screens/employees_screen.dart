@@ -24,6 +24,8 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     final roleController = TextEditingController();
     final salaryController = TextEditingController();
     final idController = TextEditingController();
+    final adharController = TextEditingController();
+    final locationController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -69,6 +71,18 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       labelText: 'Employee ID (Optional)',
                       hintText: 'Leave empty for no ID'),
                 ),
+                TextFormField(
+                  controller: adharController,
+                  decoration: const InputDecoration(
+                      labelText: 'Adhar Card (Optional)',
+                      hintText: 'Enter Adhar Card Number'),
+                ),
+                TextFormField(
+                  controller: locationController,
+                  decoration: const InputDecoration(
+                      labelText: 'Location (Optional)',
+                      hintText: 'Enter Location'),
+                ),
               ],
             ),
           ),
@@ -88,6 +102,12 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                   name: nameController.text.trim(),
                   role: roleController.text.trim(),
                   monthlySalary: double.parse(salaryController.text),
+                  adharCard: adharController.text.trim().isEmpty
+                      ? null
+                      : adharController.text.trim(),
+                  location: locationController.text.trim().isEmpty
+                      ? null
+                      : locationController.text.trim(),
                 );
                 EmployeeService().addEmployee(newEmployee);
                 Navigator.pop(context);
@@ -112,6 +132,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     final salaryController =
         TextEditingController(text: employee.monthlySalary.toStringAsFixed(0));
     final idController = TextEditingController(text: employee.id ?? '');
+    final adharController =
+        TextEditingController(text: employee.adharCard ?? '');
+    final locationController =
+        TextEditingController(text: employee.location ?? '');
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -157,6 +181,18 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       labelText: 'Employee ID (Optional)',
                       hintText: 'Leave empty for no ID'),
                 ),
+                TextFormField(
+                  controller: adharController,
+                  decoration: const InputDecoration(
+                      labelText: 'Adhar Card (Optional)',
+                      hintText: 'Enter Adhar Card Number'),
+                ),
+                TextFormField(
+                  controller: locationController,
+                  decoration: const InputDecoration(
+                      labelText: 'Location (Optional)',
+                      hintText: 'Enter Location'),
+                ),
               ],
             ),
           ),
@@ -176,6 +212,12 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                   name: nameController.text.trim(),
                   role: roleController.text.trim(),
                   monthlySalary: double.parse(salaryController.text),
+                  adharCard: adharController.text.trim().isEmpty
+                      ? null
+                      : adharController.text.trim(),
+                  location: locationController.text.trim().isEmpty
+                      ? null
+                      : locationController.text.trim(),
                 );
                 EmployeeService().updateEmployee(employee, updatedEmployee);
                 Navigator.pop(context);
@@ -246,7 +288,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                         (employee.id?.toLowerCase().contains(query) ?? false) ||
                         employee.role.toLowerCase().contains(query);
                   }).toList();
-      
+
             return SingleChildScrollView(
               padding: EdgeInsets.all(16.0.r),
               child: Column(
@@ -265,7 +307,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   SizedBox(height: 24.h),
-      
+
                   // Add Employee Button
                   SizedBox(
                     width: double.infinity,
@@ -279,7 +321,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     ),
                   ),
                   SizedBox(height: 24.h),
-      
+
                   // Search Bar
                   TextField(
                     onChanged: (value) {
@@ -290,8 +332,8 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.search),
                       hintText: 'Search employees by name, ID, or role',
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 12.h, horizontal: 16.w),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.r),
                         borderSide: BorderSide(color: Colors.grey.shade300),
@@ -303,7 +345,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     ),
                   ),
                   SizedBox(height: 24.h),
-      
+
                   // Employee List
                   if (employees.isEmpty)
                     const Center(

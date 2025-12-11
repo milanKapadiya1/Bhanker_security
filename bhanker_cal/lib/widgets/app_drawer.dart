@@ -26,15 +26,26 @@ class AppDrawer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: EdgeInsets.all(8.r),
+                  padding: EdgeInsets.all(4.r), // Reduced padding slightly
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    borderRadius: BorderRadius.circular(12.r),
+                    color: Colors.white, // Changed from primaryColor
+                    borderRadius: BorderRadius.circular(50.r), // Rounded
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: Icon(
-                    Icons.calculate_outlined,
-                    color: Colors.white,
-                    size: 32.sp,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(50.r),
+                    child: Image.asset(
+                      'assets/images/app_logo.jpg',
+                      width: 72.sp, // Slightly larger to pop
+                      height: 72.sp,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 SizedBox(height: 16.h),
