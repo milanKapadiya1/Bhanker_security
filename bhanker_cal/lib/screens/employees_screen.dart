@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/employee.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_drawer.dart';
@@ -19,6 +21,12 @@ class EmployeesScreen extends StatefulWidget {
 class _EmployeesScreenState extends State<EmployeesScreen> {
   String _searchQuery = '';
 
+  Future<String?> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    return pickedFile?.path;
+  }
+
   void _showAddEmployeeDialog(BuildContext context) {
     final nameController = TextEditingController();
     final roleController = TextEditingController();
@@ -26,102 +34,131 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     final idController = TextEditingController();
     final adharController = TextEditingController();
     final locationController = TextEditingController();
+    String? selectedPhotoPath;
     final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add New Employee'),
-        content: Form(
-          key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Please enter a name' : null,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            insetPadding: EdgeInsets.symmetric(
+                horizontal: 0.1.sw, vertical: 24.h), // Consistent width
+            title: const Text('Add New Employee'),
+            content: Form(
+              key: formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        final path = await _pickImage();
+                        if (path != null) {
+                          setState(() {
+                            selectedPhotoPath = path;
+                          });
+                        }
+                      },
+                      child: CircleAvatar(
+                        radius: 40.r,
+                        backgroundColor: Colors.grey.shade200,
+                        backgroundImage: selectedPhotoPath != null
+                            ? FileImage(File(selectedPhotoPath!))
+                            : null,
+                        child: selectedPhotoPath == null
+                            ? Icon(Icons.add_a_photo,
+                                size: 30.sp, color: Colors.grey.shade600)
+                            : null,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(labelText: 'Name'),
+                      validator: (value) =>
+                          value?.isEmpty ?? true ? 'Please enter a name' : null,
+                    ),
+                    TextFormField(
+                      controller: roleController,
+                      decoration:
+                          const InputDecoration(labelText: 'Role (Optional)'),
+                    ),
+                    TextFormField(
+                      controller: salaryController,
+                      decoration:
+                          const InputDecoration(labelText: 'Monthly Salary'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a salary';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      controller: idController,
+                      decoration: const InputDecoration(
+                          labelText: 'Employee ID (Optional)',
+                          hintText: 'Leave empty for no ID'),
+                    ),
+                    TextFormField(
+                      controller: adharController,
+                      decoration: const InputDecoration(
+                          labelText: 'Adhar Card (Optional)',
+                          hintText: 'Enter Adhar Card Number'),
+                    ),
+                    TextFormField(
+                      controller: locationController,
+                      decoration: const InputDecoration(
+                          labelText: 'Location (Optional)',
+                          hintText: 'Enter Location'),
+                    ),
+                  ],
                 ),
-                TextFormField(
-                  controller: roleController,
-                  decoration: const InputDecoration(labelText: 'Role'),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Please enter a role' : null,
-                ),
-                TextFormField(
-                  controller: salaryController,
-                  decoration:
-                      const InputDecoration(labelText: 'Monthly Salary'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a salary';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: idController,
-                  decoration: const InputDecoration(
-                      labelText: 'Employee ID (Optional)',
-                      hintText: 'Leave empty for no ID'),
-                ),
-                TextFormField(
-                  controller: adharController,
-                  decoration: const InputDecoration(
-                      labelText: 'Adhar Card (Optional)',
-                      hintText: 'Enter Adhar Card Number'),
-                ),
-                TextFormField(
-                  controller: locationController,
-                  decoration: const InputDecoration(
-                      labelText: 'Location (Optional)',
-                      hintText: 'Enter Location'),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState?.validate() ?? false) {
-                final newEmployee = Employee(
-                  id: idController.text.trim().isEmpty
-                      ? null
-                      : idController.text.trim(),
-                  name: nameController.text.trim(),
-                  role: roleController.text.trim(),
-                  monthlySalary: double.parse(salaryController.text),
-                  adharCard: adharController.text.trim().isEmpty
-                      ? null
-                      : adharController.text.trim(),
-                  location: locationController.text.trim().isEmpty
-                      ? null
-                      : locationController.text.trim(),
-                );
-                EmployeeService().addEmployee(newEmployee);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Added employee: ${newEmployee.name}'),
-                    backgroundColor: Colors.green.shade400,
-                  ),
-                );
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (formKey.currentState?.validate() ?? false) {
+                    final newEmployee = Employee(
+                      id: idController.text.trim().isEmpty
+                          ? null
+                          : idController.text.trim(),
+                      name: nameController.text.trim(),
+                      role: roleController.text.trim(),
+                      monthlySalary: double.parse(salaryController.text),
+                      adharCard: adharController.text.trim().isEmpty
+                          ? null
+                          : adharController.text.trim(),
+                      location: locationController.text.trim().isEmpty
+                          ? null
+                          : locationController.text.trim(),
+                      photoPath: selectedPhotoPath,
+                    );
+                    EmployeeService().addEmployee(newEmployee);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Added employee: ${newEmployee.name}'),
+                        backgroundColor: Colors.green.shade400,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Add'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -136,101 +173,130 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         TextEditingController(text: employee.adharCard ?? '');
     final locationController =
         TextEditingController(text: employee.location ?? '');
+    String? selectedPhotoPath = employee.photoPath;
     final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Employee'),
-        content: Form(
-          key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Please enter a name' : null,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            insetPadding: EdgeInsets.symmetric(
+                horizontal: 0.1.sw, vertical: 24.h), // 80% screen width
+            title: const Text('Edit Employee'),
+            content: Form(
+              key: formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        final path = await _pickImage();
+                        if (path != null) {
+                          setState(() {
+                            selectedPhotoPath = path;
+                          });
+                        }
+                      },
+                      child: CircleAvatar(
+                        radius: 40.r,
+                        backgroundColor: Colors.grey.shade200,
+                        backgroundImage: selectedPhotoPath != null
+                            ? FileImage(File(selectedPhotoPath!))
+                            : null,
+                        child: selectedPhotoPath == null
+                            ? Icon(Icons.add_a_photo,
+                                size: 30.sp, color: Colors.grey.shade600)
+                            : null,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    _buildLabeledTextField(
+                      controller: nameController,
+                      label: 'Name',
+                      validator: (value) =>
+                          value?.isEmpty ?? true ? 'Please enter a name' : null,
+                    ),
+                    SizedBox(height: 16.h),
+                    _buildLabeledTextField(
+                      controller: roleController,
+                      label: 'Role (Optional)',
+                    ),
+                    SizedBox(height: 16.h),
+                    _buildLabeledTextField(
+                      controller: salaryController,
+                      label: 'Monthly Salary',
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a salary';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    _buildLabeledTextField(
+                      controller: idController,
+                      label: 'Employee ID (Optional)',
+                      hint: 'Leave empty for no ID',
+                    ),
+                    SizedBox(height: 16.h),
+                    _buildLabeledTextField(
+                      controller: adharController,
+                      label: 'Adhar Card (Optional)',
+                      hint: 'Enter Adhar Card Number',
+                    ),
+                    SizedBox(height: 16.h),
+                    _buildLabeledTextField(
+                      controller: locationController,
+                      label: 'Location (Optional)',
+                      hint: 'Enter Location',
+                    ),
+                  ],
                 ),
-                TextFormField(
-                  controller: roleController,
-                  decoration: const InputDecoration(labelText: 'Role'),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Please enter a role' : null,
-                ),
-                TextFormField(
-                  controller: salaryController,
-                  decoration:
-                      const InputDecoration(labelText: 'Monthly Salary'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a salary';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: idController,
-                  decoration: const InputDecoration(
-                      labelText: 'Employee ID (Optional)',
-                      hintText: 'Leave empty for no ID'),
-                ),
-                TextFormField(
-                  controller: adharController,
-                  decoration: const InputDecoration(
-                      labelText: 'Adhar Card (Optional)',
-                      hintText: 'Enter Adhar Card Number'),
-                ),
-                TextFormField(
-                  controller: locationController,
-                  decoration: const InputDecoration(
-                      labelText: 'Location (Optional)',
-                      hintText: 'Enter Location'),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState?.validate() ?? false) {
-                final updatedEmployee = Employee(
-                  id: idController.text.trim().isEmpty
-                      ? null
-                      : idController.text.trim(),
-                  name: nameController.text.trim(),
-                  role: roleController.text.trim(),
-                  monthlySalary: double.parse(salaryController.text),
-                  adharCard: adharController.text.trim().isEmpty
-                      ? null
-                      : adharController.text.trim(),
-                  location: locationController.text.trim().isEmpty
-                      ? null
-                      : locationController.text.trim(),
-                );
-                EmployeeService().updateEmployee(employee, updatedEmployee);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content:
-                          Text('Updated employee: ${updatedEmployee.name}')),
-                );
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (formKey.currentState?.validate() ?? false) {
+                    final updatedEmployee = Employee(
+                      id: idController.text.trim().isEmpty
+                          ? null
+                          : idController.text.trim(),
+                      name: nameController.text.trim(),
+                      role: roleController.text.trim(),
+                      monthlySalary: double.parse(salaryController.text),
+                      adharCard: adharController.text.trim().isEmpty
+                          ? null
+                          : adharController.text.trim(),
+                      location: locationController.text.trim().isEmpty
+                          ? null
+                          : locationController.text.trim(),
+                      photoPath: selectedPhotoPath,
+                    );
+                    EmployeeService().updateEmployee(employee, updatedEmployee);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(
+                              'Updated employee: ${updatedEmployee.name}')),
+                    );
+                  }
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -262,6 +328,51 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLabeledTextField({
+    required TextEditingController controller,
+    required String label,
+    String? hint,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13.sp, // Reduced font size
+            fontWeight: FontWeight.w600,
+            color: Colors.black87, // Lighter black
+          ),
+        ),
+        SizedBox(height: 8.h),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          style: TextStyle(
+              fontSize: 14.sp, color: Colors.black87), // Lighter black
+          validator: validator,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+                fontSize: 14.sp, color: Colors.black45), // Lighter hint
+            contentPadding:
+                EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -387,7 +498,12 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 CircleAvatar(
                   radius: 24.r,
                   backgroundColor: AppTheme.primaryColor,
-                  child: const Icon(Icons.person_outline, color: Colors.white),
+                  backgroundImage: employee.photoPath != null
+                      ? FileImage(File(employee.photoPath!))
+                      : null,
+                  child: employee.photoPath == null
+                      ? const Icon(Icons.person_outline, color: Colors.white)
+                      : null,
                 ),
                 SizedBox(width: 12.w),
                 Expanded(

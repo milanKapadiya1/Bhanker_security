@@ -5,6 +5,7 @@ class Employee {
   final double monthlySalary;
   final String? adharCard;
   final String? location;
+  final String? photoPath;
 
   Employee({
     this.id,
@@ -13,6 +14,7 @@ class Employee {
     required this.monthlySalary,
     this.adharCard,
     this.location,
+    this.photoPath,
   });
 
   factory Employee.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Employee {
       monthlySalary: json['monthlySalary'].toDouble(),
       adharCard: json['adharCard'],
       location: json['location'],
+      photoPath: json['photoPath'],
     );
   }
 
@@ -34,6 +37,7 @@ class Employee {
       'monthlySalary': monthlySalary,
       'adharCard': adharCard,
       'location': location,
+      'photoPath': photoPath,
     };
   }
 }

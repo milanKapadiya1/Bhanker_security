@@ -84,27 +84,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
               columnWidths: {
                 0: const pw.IntrinsicColumnWidth(), // Name
                 1: const pw.IntrinsicColumnWidth(), // ID
-                2: const pw.IntrinsicColumnWidth(), // Role
-                3: const pw.IntrinsicColumnWidth(), // Days
-                4: const pw.IntrinsicColumnWidth(), // Per Day
-                5: const pw.IntrinsicColumnWidth(), // Monthly
-                6: const pw.FlexColumnWidth(), // Deductions
-                7: const pw.IntrinsicColumnWidth(), // Gross Salary
+                2: const pw.IntrinsicColumnWidth(), // Days
+                3: const pw.IntrinsicColumnWidth(), // Per Day
+                4: const pw.IntrinsicColumnWidth(), // Monthly
+                5: const pw.FlexColumnWidth(), // Deductions
+                6: const pw.IntrinsicColumnWidth(), // Gross Salary
               },
               cellAlignments: {
                 0: pw.Alignment.centerLeft,
                 1: pw.Alignment.centerLeft,
-                2: pw.Alignment.centerLeft,
-                3: pw.Alignment.center,
+                2: pw.Alignment.center,
+                3: pw.Alignment.centerRight,
                 4: pw.Alignment.centerRight,
-                5: pw.Alignment.centerRight,
-                6: pw.Alignment.centerLeft, // Deductions
-                7: pw.Alignment.centerRight, // Gross Salary
+                5: pw.Alignment.centerLeft, // Deductions
+                6: pw.Alignment.centerRight, // Gross Salary
               },
               headers: [
                 'Name',
                 'ID',
-                'Role',
                 'Days',
                 'Per Day',
                 'Monthly',
@@ -125,7 +122,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 return [
                   item.employeeName,
                   item.employeeId,
-                  item.employeeRole,
                   '${item.presentDays}/${item.totalDays}',
                   NumberFormat('#,##0').format(item.perDayAmount),
                   NumberFormat('#,##0').format(item.monthlySalary),

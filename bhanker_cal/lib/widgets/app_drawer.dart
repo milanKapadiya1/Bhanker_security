@@ -49,17 +49,26 @@ class AppDrawer extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 16.h),
-                Text(
-                  'BhankerCal',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
-                      ),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Bhanker Crops Management',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textPrimary,
+                          fontSize: 18.sp, // Reduced and wrapped in FittedBox
+                        ),
+                  ),
                 ),
                 SizedBox(height: 4.h),
-                Text(
-                  'Salary Calculator',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Employee Details and calculate salary',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ),
               ],
             ),
@@ -81,17 +90,17 @@ class AppDrawer extends StatelessWidget {
                 SizedBox(height: 16.h),
                 _buildDrawerItem(
                   context,
-                  icon: Icons.calculate_outlined,
-                  title: 'Calculator',
-                  route: CalculatorScreen.routeName,
-                  isSelected: currentRoute == CalculatorScreen.routeName,
-                ),
-                _buildDrawerItem(
-                  context,
                   icon: Icons.people_outline,
                   title: 'Employees',
                   route: EmployeesScreen.routeName,
                   isSelected: currentRoute == EmployeesScreen.routeName,
+                ),
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.calculate_outlined,
+                  title: 'Calculator',
+                  route: CalculatorScreen.routeName,
+                  isSelected: currentRoute == CalculatorScreen.routeName,
                 ),
                 _buildDrawerItem(
                   context,

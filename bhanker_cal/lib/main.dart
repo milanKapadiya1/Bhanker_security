@@ -29,7 +29,7 @@ class BhankerCalApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp(
-          title: 'BhankerCal',
+          title: 'Bhanker Crops Management',
           theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
           home: const SplashScreen(), // Start with Custom Splash

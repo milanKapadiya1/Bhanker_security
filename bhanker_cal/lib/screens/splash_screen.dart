@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
-import 'calculator_screen.dart';
+
+import 'employees_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -36,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacementNamed(CalculatorScreen.routeName);
+      Navigator.of(context).pushReplacementNamed(EmployeesScreen.routeName);
     });
   }
 
