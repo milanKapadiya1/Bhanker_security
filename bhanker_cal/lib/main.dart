@@ -5,6 +5,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'theme/app_theme.dart';
 import 'screens/calculator_screen.dart';
 import 'screens/employees_screen.dart';
+import 'screens/guard_location_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/splash_screen.dart';
 
@@ -36,6 +37,8 @@ class BhankerCalApp extends StatelessWidget {
           routes: {
             CalculatorScreen.routeName: (context) => const CalculatorScreen(),
             EmployeesScreen.routeName: (context) => const EmployeesScreen(),
+            GuardLocationScreen.routeName: (context) =>
+                const GuardLocationScreen(),
             HistoryScreen.routeName: (context) => const HistoryScreen(),
           },
         );

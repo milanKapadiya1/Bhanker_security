@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import '../models/employee.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_drawer.dart';
@@ -24,7 +26,30 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   Future<String?> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    return pickedFile?.path;
+
+    if (pickedFile == null) return null;
+
+    try {
+      // Get the Application Documents Directory
+      final directory = await getApplicationDocumentsDirectory();
+
+      // Create a dedicated subdirectory for employee photos
+      final photosDir = Directory('${directory.path}/employee_photos');
+      if (!await photosDir.exists()) {
+        await photosDir.create(recursive: true);
+      }
+
+      // Generate a unique filename using timestamp
+      final fileName =
+          'employee_${DateTime.now().millisecondsSinceEpoch}${path.extension(pickedFile.path)}';
+      final savedImage =
+          await File(pickedFile.path).copy('${photosDir.path}/$fileName');
+
+      return savedImage.path;
+    } catch (e) {
+      debugPrint('Error saving image: $e');
+      return null;
+    }
   }
 
   void _showAddEmployeeDialog(BuildContext context) {
@@ -60,16 +85,23 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                           });
                         }
                       },
-                      child: CircleAvatar(
-                        radius: 40.r,
-                        backgroundColor: Colors.grey.shade200,
-                        backgroundImage: selectedPhotoPath != null
-                            ? FileImage(File(selectedPhotoPath!))
-                            : null,
-                        child: selectedPhotoPath == null
-                            ? Icon(Icons.add_a_photo,
-                                size: 30.sp, color: Colors.grey.shade600)
-                            : null,
+                      child: Container(
+                        width: 80.r,
+                        height: 80.r,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey.shade200,
+                        ),
+                        child: ClipOval(
+                          child: selectedPhotoPath != null
+                              ? Image.file(
+                                  File(selectedPhotoPath!),
+                                  fit: BoxFit.cover,
+                                  gaplessPlayback: true,
+                                )
+                              : Icon(Icons.add_a_photo,
+                                  size: 30.sp, color: Colors.grey.shade600),
+                        ),
                       ),
                     ),
                     SizedBox(height: 24.h),
@@ -199,16 +231,23 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                           });
                         }
                       },
-                      child: CircleAvatar(
-                        radius: 40.r,
-                        backgroundColor: Colors.grey.shade200,
-                        backgroundImage: selectedPhotoPath != null
-                            ? FileImage(File(selectedPhotoPath!))
-                            : null,
-                        child: selectedPhotoPath == null
-                            ? Icon(Icons.add_a_photo,
-                                size: 30.sp, color: Colors.grey.shade600)
-                            : null,
+                      child: Container(
+                        width: 80.r,
+                        height: 80.r,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey.shade200,
+                        ),
+                        child: ClipOval(
+                          child: selectedPhotoPath != null
+                              ? Image.file(
+                                  File(selectedPhotoPath!),
+                                  fit: BoxFit.cover,
+                                  gaplessPlayback: true,
+                                )
+                              : Icon(Icons.add_a_photo,
+                                  size: 30.sp, color: Colors.grey.shade600),
+                        ),
                       ),
                     ),
                     SizedBox(height: 24.h),
@@ -495,15 +534,26 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 24.r,
-                  backgroundColor: AppTheme.primaryColor,
-                  backgroundImage: employee.photoPath != null
-                      ? FileImage(File(employee.photoPath!))
-                      : null,
-                  child: employee.photoPath == null
-                      ? const Icon(Icons.person_outline, color: Colors.white)
-                      : null,
+                Container(
+                  width: 48.r,
+                  height: 48.r,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppTheme.primaryColor,
+                  ),
+                  child: ClipOval(
+                    child: employee.photoPath != null
+                        ? Image.file(
+                            File(employee.photoPath!),
+                            fit: BoxFit.cover,
+                            gaplessPlayback: true,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(Icons.person_outline,
+                                  color: Colors.white);
+                            },
+                          )
+                        : Icon(Icons.person_outline, color: Colors.white),
+                  ),
                 ),
                 SizedBox(width: 12.w),
                 Expanded(
