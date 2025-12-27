@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +11,7 @@ import '../theme/app_theme.dart';
 import '../widgets/app_drawer.dart';
 
 import '../services/employee_service.dart';
+import '../utils/currency_input_formatter.dart';
 
 class EmployeesScreen extends StatefulWidget {
   static const routeName = '/employees';
@@ -121,11 +123,14 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       decoration:
                           const InputDecoration(labelText: 'Monthly Salary'),
                       keyboardType: TextInputType.number,
+                      inputFormatters: [CurrencyInputFormatter()],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a salary';
                         }
-                        if (double.tryParse(value) == null) {
+                        // Remove commas for validation
+                        if (double.tryParse(value.replaceAll(',', '')) ==
+                            null) {
                           return 'Please enter a valid number';
                         }
                         return null;
@@ -167,7 +172,8 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                           : idController.text.trim(),
                       name: nameController.text.trim(),
                       role: roleController.text.trim(),
-                      monthlySalary: double.parse(salaryController.text),
+                      monthlySalary: CurrencyInputFormatter.parseAmount(
+                          salaryController.text),
                       adharCard: adharController.text.trim().isEmpty
                           ? null
                           : adharController.text.trim(),
@@ -198,8 +204,8 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   void _showEditEmployeeDialog(BuildContext context, Employee employee) {
     final nameController = TextEditingController(text: employee.name);
     final roleController = TextEditingController(text: employee.role);
-    final salaryController =
-        TextEditingController(text: employee.monthlySalary.toStringAsFixed(0));
+    final salaryController = TextEditingController(
+        text: CurrencyInputFormatter.formatAmount(employee.monthlySalary));
     final idController = TextEditingController(text: employee.id ?? '');
     final adharController =
         TextEditingController(text: employee.adharCard ?? '');
@@ -267,11 +273,13 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       controller: salaryController,
                       label: 'Monthly Salary',
                       keyboardType: TextInputType.number,
+                      inputFormatters: [CurrencyInputFormatter()],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a salary';
                         }
-                        if (double.tryParse(value) == null) {
+                        if (double.tryParse(value.replaceAll(',', '')) ==
+                            null) {
                           return 'Please enter a valid number';
                         }
                         return null;
@@ -313,7 +321,8 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                           : idController.text.trim(),
                       name: nameController.text.trim(),
                       role: roleController.text.trim(),
-                      monthlySalary: double.parse(salaryController.text),
+                      monthlySalary: CurrencyInputFormatter.parseAmount(
+                          salaryController.text),
                       adharCard: adharController.text.trim().isEmpty
                           ? null
                           : adharController.text.trim(),
@@ -375,6 +384,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     required String label,
     String? hint,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
   }) {
     return Column(
@@ -392,6 +402,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           style: TextStyle(
               fontSize: 14.sp, color: Colors.black87), // Lighter black
           validator: validator,

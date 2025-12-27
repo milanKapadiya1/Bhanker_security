@@ -8,6 +8,7 @@ import '../widgets/app_drawer.dart';
 import '../widgets/month_picker_dialog.dart';
 import '../services/employee_service.dart';
 import '../services/salary_service.dart';
+import '../utils/currency_input_formatter.dart';
 
 class CalculatorScreen extends StatefulWidget {
   static const routeName = '/calculator';
@@ -70,7 +71,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void _addNewEmployee() {
     if (_nameInput.trim().isEmpty) return;
 
-    final double salary = double.tryParse(_salaryController.text) ?? 0;
+    final double salary =
+        CurrencyInputFormatter.parseAmount(_salaryController.text);
     if (salary <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -101,14 +103,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> _calculateSalary() async {
-    final double? salary = double.tryParse(_salaryController.text);
+    final double salary =
+        CurrencyInputFormatter.parseAmount(_salaryController.text);
     final int? days = int.tryParse(_daysController.text);
     final double wc = double.tryParse(_wcController.text) ?? 0;
     final double uniform = double.tryParse(_uniformController.text) ?? 0;
     final double advance = double.tryParse(_advanceController.text) ?? 0;
 
     // Allow calculation if we have a name (even if not saved as employee yet)
-    if (salary != null &&
+    // Salary is 0 if empty or invalid parse, but parseAmount returns 0.0 on fail, so check > 0
+    if (salary > 0 &&
         days != null &&
         (_selectedEmployee != null || _nameInput.isNotEmpty)) {
       final totalDaysInMonth =
@@ -278,7 +282,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         },
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                              horizontal: 16.w, vertical: 12.h),
+                              horizontal: 12.w, vertical: 10.h),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8.r),
@@ -314,7 +318,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               Text('Select Employee',
                   style:
                       TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Autocomplete<Employee>(
                 key: _autocompleteKey,
                 optionsBuilder: (TextEditingValue textEditingValue) {
@@ -329,7 +333,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     _selectedEmployee = selection;
                     _nameInput = selection.name;
                     _salaryController.text =
-                        selection.monthlySalary.toStringAsFixed(0);
+                        CurrencyInputFormatter.formatAmount(
+                            selection.monthlySalary);
                   });
                 },
                 fieldViewBuilder: (context, textEditingController, focusNode,
@@ -347,27 +352,34 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         }
                       });
                     },
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.search),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w, vertical: 10.h),
+                      prefixIcon: const Icon(Icons.search),
                       hintText: 'Search or type new name...',
                     ),
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // Monthly Salary
               const Text('Monthly Salary (₹)',
                   style: TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               TextField(
                 controller: _salaryController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                inputFormatters: [CurrencyInputFormatter()],
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                   hintText: 'Enter monthly salary',
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // Deductions Row (WC, Uniform, Advance)
               Row(
@@ -378,11 +390,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       children: [
                         const Text('WC',
                             style: TextStyle(fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         TextField(
                           controller: _wcController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12.w, vertical: 10.h),
                             hintText: 'WC',
                           ),
                         ),
@@ -396,11 +411,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       children: [
                         const Text('Uniform',
                             style: TextStyle(fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         TextField(
                           controller: _uniformController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12.w, vertical: 10.h),
                             hintText: 'Uniform',
                           ),
                         ),
@@ -414,11 +432,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       children: [
                         const Text('Advance',
                             style: TextStyle(fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         TextField(
                           controller: _advanceController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12.w, vertical: 10.h),
                             hintText: 'Advance',
                           ),
                         ),
@@ -427,16 +448,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // Present Days
               const Text('Present Days',
                   style: TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               TextField(
                 controller: _daysController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                   hintText: 'Enter present days',
                 ),
               ),
@@ -451,7 +475,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     icon: const Icon(Icons.person_add_alt_1),
                     label: const Text('Save New Employee'),
                     style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      padding: EdgeInsets.symmetric(vertical: 10.h),
                       side: const BorderSide(color: Colors.blue),
                       foregroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
@@ -470,7 +494,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   icon: const Icon(Icons.calculate),
                   label: const Text('Calculate Salary'),
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
                     textStyle:
                         TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                     shape: RoundedRectangleBorder(
@@ -486,7 +510,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 child: OutlinedButton(
                   onPressed: _clearForm,
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
                     side: BorderSide(color: Colors.grey.shade300),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.r)),

@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/employee.dart';
+import '../models/relocation.dart';
 
 class EmployeeService extends ChangeNotifier {
   static final EmployeeService _instance = EmployeeService._internal();
   static const String _storageKey = 'employees_data';
+  static const String _relocationStorageKey = 'relocations_data';
 
   factory EmployeeService() {
     return _instance;
@@ -13,11 +15,14 @@ class EmployeeService extends ChangeNotifier {
 
   EmployeeService._internal() {
     _loadEmployees();
+    _loadRelocations();
   }
 
   List<Employee> _employees = [];
+  List<Relocation> _relocations = [];
 
   List<Employee> get employees => List.unmodifiable(_employees);
+  List<Relocation> get relocations => List.unmodifiable(_relocations);
 
   Future<void> _loadEmployees() async {
     final prefs = await SharedPreferences.getInstance();
@@ -30,6 +35,18 @@ class EmployeeService extends ChangeNotifier {
     }
   }
 
+  Future<void> _loadRelocations() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? relocationsJson = prefs.getString(_relocationStorageKey);
+
+    if (relocationsJson != null) {
+      final List<dynamic> decodedList = jsonDecode(relocationsJson);
+      _relocations =
+          decodedList.map((item) => Relocation.fromJson(item)).toList();
+      notifyListeners();
+    }
+  }
+
   Future<void> _saveEmployees() async {
     final prefs = await SharedPreferences.getInstance();
     final String encodedList =
@@ -37,10 +54,23 @@ class EmployeeService extends ChangeNotifier {
     await prefs.setString(_storageKey, encodedList);
   }
 
+  Future<void> _saveRelocations() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String encodedList =
+        jsonEncode(_relocations.map((e) => e.toJson()).toList());
+    await prefs.setString(_relocationStorageKey, encodedList);
+  }
+
   Future<void> addEmployee(Employee employee) async {
     _employees.add(employee);
     notifyListeners();
     await _saveEmployees();
+  }
+
+  Future<void> addRelocation(Relocation relocation) async {
+    _relocations.add(relocation);
+    notifyListeners();
+    await _saveRelocations();
   }
 
   Future<void> updateEmployee(
