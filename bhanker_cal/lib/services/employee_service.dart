@@ -93,9 +93,7 @@ class EmployeeService extends ChangeNotifier {
     if (query.isEmpty) return [];
     final lowerQuery = query.toLowerCase();
     return _employees.where((employee) {
-      return employee.name.toLowerCase().contains(lowerQuery) ||
-          (employee.id?.toLowerCase().contains(lowerQuery) ?? false) ||
-          employee.role.toLowerCase().contains(lowerQuery);
+      return employee.name.toLowerCase().contains(lowerQuery);
     }).toList();
   }
 

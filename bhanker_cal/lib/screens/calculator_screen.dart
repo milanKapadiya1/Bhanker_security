@@ -23,12 +23,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   DateTime _selectedDate = DateTime.now();
   Employee? _selectedEmployee;
   final TextEditingController _salaryController = TextEditingController();
+  final TextEditingController _pointSalaryController =
+      TextEditingController(); // New Point Salary Controller
   final TextEditingController _daysController = TextEditingController();
   final TextEditingController _wcController = TextEditingController();
   final TextEditingController _uniformController = TextEditingController();
   final TextEditingController _advanceController = TextEditingController();
   CalculationResult? _currentResult;
   String _nameInput = '';
+  final ValueNotifier<bool> _isCalculatedNotifier =
+      ValueNotifier(false); // Track calculation state via ValueNotifier
 
   // History List
   List<CalculationResult> _history = [];
@@ -61,10 +65,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   void dispose() {
     _salaryController.dispose();
+    _pointSalaryController.dispose();
     _daysController.dispose();
     _wcController.dispose();
     _uniformController.dispose();
     _advanceController.dispose();
+    _isCalculatedNotifier.dispose();
     super.dispose();
   }
 
@@ -82,10 +88,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
 
     final newEmployee = Employee(
-      id: null, // ID is optional/null for new employees added on the fly
       name: _nameInput.trim(),
-      role: 'Employee',
       monthlySalary: salary,
+      pointSalary: 0.0, // Default for quick employee
     );
 
     _employeeService.addEmployee(newEmployee);
@@ -133,8 +138,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       }
 
       final employeeName = _selectedEmployee?.name ?? _nameInput;
-      final employeeId = _selectedEmployee?.id ?? 'TEMP';
-      final employeeRole = _selectedEmployee?.role ?? 'Employee';
 
       final totalDeductions = wc + uniform + advance;
       final calculatedSalary =
@@ -142,10 +145,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
       final result = CalculationResult(
         employeeName: employeeName,
-        employeeId: employeeId,
-        employeeRole: employeeRole,
         date: _selectedDate,
         monthlySalary: salary,
+        pointSalary: CurrencyInputFormatter.parseAmount(
+            _pointSalaryController.text), // Capture Point Salary
         presentDays: days,
         totalDays: totalDaysInMonth,
         calculatedSalary: calculatedSalary,
@@ -159,6 +162,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         _currentResult = result;
         _history.insert(0, result); // Add to top of history
       });
+      _isCalculatedNotifier.value = true; // Disable button after calculation
 
       // Save to persistence (Session only)
       await _salaryService.saveSession(_history);
@@ -180,6 +184,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _selectedEmployee = null;
       _nameInput = '';
       _salaryController.clear();
+      _pointSalaryController.clear();
       _daysController.clear();
       _wcController.clear();
       _uniformController.clear();
@@ -187,6 +192,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _currentResult = null;
       _autocompleteKey = UniqueKey(); // Reset autocomplete
     });
+    _isCalculatedNotifier.value = false; // Re-enable button
   }
 
   void _resetAll() {
@@ -312,7 +318,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 10),
 
               // Employee Search (Autocomplete)
               Text('Select Employee',
@@ -335,6 +341,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     _salaryController.text =
                         CurrencyInputFormatter.formatAmount(
                             selection.monthlySalary);
+                    _pointSalaryController.text =
+                        CurrencyInputFormatter.formatAmount(
+                            selection.pointSalary);
                   });
                 },
                 fieldViewBuilder: (context, textEditingController, focusNode,
@@ -362,7 +371,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   );
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 30),
 
               // Monthly Salary
               const Text('Monthly Salary (₹)',
@@ -377,6 +386,40 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                   hintText: 'Enter monthly salary',
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Point Salary (Read Only)
+              const Text('Point Salary (₹)',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              TextField(
+                controller: _pointSalaryController,
+                readOnly: true,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Money You Get'),
+                      content:
+                          Text('This is the Point Salary from employee data.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                  hintText: 'Point Salary',
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
                 ),
               ),
               const SizedBox(height: 12),
@@ -489,17 +532,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               // Calculate Button
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _calculateSalary,
-                  icon: const Icon(Icons.calculate),
-                  label: const Text('Calculate Salary'),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 12.h),
-                    textStyle:
-                        TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r)),
-                  ),
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _isCalculatedNotifier,
+                  builder: (context, isCalculated, child) {
+                    return ElevatedButton.icon(
+                      onPressed: isCalculated ? null : _calculateSalary,
+                      icon: const Icon(Icons.calculate),
+                      label: const Text('Calculate Salary'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        textStyle: TextStyle(
+                            fontSize: 16.sp, fontWeight: FontWeight.bold),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r)),
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 16),
@@ -882,11 +930,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                       ),
                                     ],
                                   ),
+                                  const SizedBox(height: 4),
+                                  // Profit
+                                  Text(
+                                    'Profit: +₹${NumberFormat('#,##0').format(item.profit)}',
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green.shade700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  // Deductions
                                   if (item.wc > 0 ||
                                       item.uniform > 0 ||
                                       item.advance > 0) ...[
-                                    SizedBox(height: 4.h),
-                                    Row(
+                                    Wrap(
                                       children: [
                                         Text(
                                           'Deductions: ',

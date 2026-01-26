@@ -1,9 +1,8 @@
 class CalculationResult {
   final String employeeName;
-  final String employeeId;
-  final String employeeRole; // New field
   final DateTime date;
   final double monthlySalary;
+  final double pointSalary; // Added pointSalary field
   final int presentDays;
   final int totalDays;
   final double calculatedSalary;
@@ -15,10 +14,9 @@ class CalculationResult {
 
   CalculationResult({
     required this.employeeName,
-    required this.employeeId,
-    required this.employeeRole,
     required this.date,
     required this.monthlySalary,
+    this.pointSalary = 0.0, // Default 0.0 if not provided (migration safe)
     required this.presentDays,
     required this.totalDays,
     required this.calculatedSalary,
@@ -29,13 +27,13 @@ class CalculationResult {
   });
 
   double get perDayAmount => monthlySalary / totalDays;
+  double get profit => calculatedSalary - pointSalary; // Profit Calculation
 
   CalculationResult copyWith({
     String? employeeName,
-    String? employeeId,
-    String? employeeRole,
     DateTime? date,
     double? monthlySalary,
+    double? pointSalary,
     int? presentDays,
     int? totalDays,
     double? calculatedSalary,
@@ -46,10 +44,9 @@ class CalculationResult {
   }) {
     return CalculationResult(
       employeeName: employeeName ?? this.employeeName,
-      employeeId: employeeId ?? this.employeeId,
-      employeeRole: employeeRole ?? this.employeeRole,
       date: date ?? this.date,
       monthlySalary: monthlySalary ?? this.monthlySalary,
+      pointSalary: pointSalary ?? this.pointSalary,
       presentDays: presentDays ?? this.presentDays,
       totalDays: totalDays ?? this.totalDays,
       calculatedSalary: calculatedSalary ?? this.calculatedSalary,
@@ -62,17 +59,16 @@ class CalculationResult {
 
   factory CalculationResult.fromJson(Map<String, dynamic> json) {
     return CalculationResult(
-      employeeName: json['employeeName'],
-      employeeId: json['employeeId'],
-      employeeRole: json['employeeRole'] ?? 'Employee',
-      date: DateTime.parse(json['date']),
-      monthlySalary: json['monthlySalary'].toDouble(),
-      presentDays: json['presentDays'],
-      totalDays: json['totalDays'],
-      calculatedSalary: json['calculatedSalary'].toDouble(),
-      wc: (json['wc'] ?? 0.0).toDouble(),
-      uniform: (json['uniform'] ?? 0.0).toDouble(),
-      advance: (json['advance'] ?? 0.0).toDouble(),
+      employeeName: json['employeeName'] ?? 'Unknown',
+      date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
+      monthlySalary: (json['monthlySalary'] ?? 0).toDouble(),
+      pointSalary: (json['pointSalary'] ?? 0).toDouble(), // Handle legacy JSON
+      presentDays: json['presentDays'] ?? 0,
+      totalDays: json['totalDays'] ?? 0,
+      calculatedSalary: (json['calculatedSalary'] ?? 0).toDouble(),
+      wc: (json['wc'] ?? 0).toDouble(),
+      uniform: (json['uniform'] ?? 0).toDouble(),
+      advance: (json['advance'] ?? 0).toDouble(),
       isSaved: json['isSaved'] ?? false,
     );
   }
@@ -80,10 +76,9 @@ class CalculationResult {
   Map<String, dynamic> toJson() {
     return {
       'employeeName': employeeName,
-      'employeeId': employeeId,
-      'employeeRole': employeeRole,
       'date': date.toIso8601String(),
       'monthlySalary': monthlySalary,
+      'pointSalary': pointSalary,
       'presentDays': presentDays,
       'totalDays': totalDays,
       'calculatedSalary': calculatedSalary,

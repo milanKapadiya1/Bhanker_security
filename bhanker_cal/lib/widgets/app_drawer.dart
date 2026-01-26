@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../screens/calculator_screen.dart';
 import '../screens/employees_screen.dart';
-import '../screens/guard_location_screen.dart';
+
 import '../screens/history_screen.dart';
 import '../theme/app_theme.dart';
 
@@ -95,13 +95,6 @@ class AppDrawer extends StatelessWidget {
                   title: 'Employees',
                   route: EmployeesScreen.routeName,
                   isSelected: currentRoute == EmployeesScreen.routeName,
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.security,
-                  title: 'Guard Location',
-                  route: GuardLocationScreen.routeName,
-                  isSelected: currentRoute == GuardLocationScreen.routeName,
                 ),
                 _buildDrawerItem(
                   context,

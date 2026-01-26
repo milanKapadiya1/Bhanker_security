@@ -56,11 +56,12 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
 
   void _showAddEmployeeDialog(BuildContext context) {
     final nameController = TextEditingController();
-    final roleController = TextEditingController();
     final salaryController = TextEditingController();
-    final idController = TextEditingController();
-    final adharController = TextEditingController();
+    final pointSalaryController = TextEditingController(); // New controller
     final locationController = TextEditingController();
+    final residentialController = TextEditingController();
+    final adharController = TextEditingController();
+    final phoneController = TextEditingController();
     String? selectedPhotoPath;
     final formKey = GlobalKey<FormState>();
 
@@ -107,17 +108,14 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       ),
                     ),
                     SizedBox(height: 24.h),
+                    // 1. Name
                     TextFormField(
                       controller: nameController,
                       decoration: const InputDecoration(labelText: 'Name'),
                       validator: (value) =>
                           value?.isEmpty ?? true ? 'Please enter a name' : null,
                     ),
-                    TextFormField(
-                      controller: roleController,
-                      decoration:
-                          const InputDecoration(labelText: 'Role (Optional)'),
-                    ),
+                    // 2. Monthly Salary
                     TextFormField(
                       controller: salaryController,
                       decoration:
@@ -136,23 +134,57 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                         return null;
                       },
                     ),
+                    // New Point Salary Field
                     TextFormField(
-                      controller: idController,
+                      controller: pointSalaryController,
                       decoration: const InputDecoration(
-                          labelText: 'Employee ID (Optional)',
-                          hintText: 'Leave empty for no ID'),
+                          labelText: 'Point Salary',
+                          hintText: 'Enter Point Salary'),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [CurrencyInputFormatter()],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a point salary';
+                        }
+                        if (double.tryParse(value.replaceAll(',', '')) ==
+                            null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
                     ),
+                    // 3. Point (Moved to third position)
+                    TextFormField(
+                      controller: locationController,
+                      decoration: const InputDecoration(
+                          labelText: 'Point', hintText: 'Enter Point'),
+                      validator: (value) => value?.isEmpty ?? true
+                          ? 'Please enter a point'
+                          : null,
+                    ),
+                    // 4. Home Address (Renamed from Residential Address)
+                    TextFormField(
+                      controller: residentialController,
+                      decoration: const InputDecoration(
+                          labelText: 'Home Address (Optional)',
+                          hintText: 'Enter Home Address'),
+                      maxLines: 2,
+                      minLines: 1,
+                    ),
+                    // 5. Adhar Card
                     TextFormField(
                       controller: adharController,
                       decoration: const InputDecoration(
                           labelText: 'Adhar Card (Optional)',
                           hintText: 'Enter Adhar Card Number'),
                     ),
+                    // 6. Phone Number (New)
                     TextFormField(
-                      controller: locationController,
+                      controller: phoneController,
                       decoration: const InputDecoration(
-                          labelText: 'Location (Optional)',
-                          hintText: 'Enter Location'),
+                          labelText: 'Phone Number (Optional)',
+                          hintText: 'Enter Phone Number'),
+                      keyboardType: TextInputType.phone,
                     ),
                   ],
                 ),
@@ -167,20 +199,23 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 onPressed: () {
                   if (formKey.currentState?.validate() ?? false) {
                     final newEmployee = Employee(
-                      id: idController.text.trim().isEmpty
-                          ? null
-                          : idController.text.trim(),
                       name: nameController.text.trim(),
-                      role: roleController.text.trim(),
                       monthlySalary: CurrencyInputFormatter.parseAmount(
                           salaryController.text),
+                      pointSalary: CurrencyInputFormatter.parseAmount(
+                          pointSalaryController.text),
                       adharCard: adharController.text.trim().isEmpty
                           ? null
                           : adharController.text.trim(),
-                      location: locationController.text.trim().isEmpty
-                          ? null
-                          : locationController.text.trim(),
+                      location: locationController.text.trim(),
+                      residentialAddress:
+                          residentialController.text.trim().isEmpty
+                              ? null
+                              : residentialController.text.trim(),
                       photoPath: selectedPhotoPath,
+                      phoneNumber: phoneController.text.trim().isEmpty
+                          ? null
+                          : phoneController.text.trim(),
                     );
                     EmployeeService().addEmployee(newEmployee);
                     Navigator.pop(context);
@@ -203,14 +238,18 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
 
   void _showEditEmployeeDialog(BuildContext context, Employee employee) {
     final nameController = TextEditingController(text: employee.name);
-    final roleController = TextEditingController(text: employee.role);
     final salaryController = TextEditingController(
         text: CurrencyInputFormatter.formatAmount(employee.monthlySalary));
-    final idController = TextEditingController(text: employee.id ?? '');
+    final pointSalaryController = TextEditingController(
+        text: CurrencyInputFormatter.formatAmount(employee.pointSalary));
     final adharController =
         TextEditingController(text: employee.adharCard ?? '');
     final locationController =
         TextEditingController(text: employee.location ?? '');
+    final residentialController =
+        TextEditingController(text: employee.residentialAddress ?? '');
+    final phoneController =
+        TextEditingController(text: employee.phoneNumber ?? '');
     String? selectedPhotoPath = employee.photoPath;
     final formKey = GlobalKey<FormState>();
 
@@ -257,6 +296,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       ),
                     ),
                     SizedBox(height: 24.h),
+                    // 1. Name
                     _buildLabeledTextField(
                       controller: nameController,
                       label: 'Name',
@@ -264,16 +304,11 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                           value?.isEmpty ?? true ? 'Please enter a name' : null,
                     ),
                     SizedBox(height: 16.h),
-                    _buildLabeledTextField(
-                      controller: roleController,
-                      label: 'Role (Optional)',
-                    ),
-                    SizedBox(height: 16.h),
+                    // 2. Salary
                     _buildLabeledTextField(
                       controller: salaryController,
                       label: 'Monthly Salary',
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [CurrencyInputFormatter()],
+                      isNumber: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a salary';
@@ -286,22 +321,50 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                       },
                     ),
                     SizedBox(height: 16.h),
+                    // New Point Salary Field in Edit
                     _buildLabeledTextField(
-                      controller: idController,
-                      label: 'Employee ID (Optional)',
-                      hint: 'Leave empty for no ID',
+                      controller: pointSalaryController,
+                      label: 'Point Salary',
+                      isNumber: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a point salary';
+                        }
+                        if (double.tryParse(value.replaceAll(',', '')) ==
+                            null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
                     ),
                     SizedBox(height: 16.h),
+                    // 3. Point (Third)
+                    _buildLabeledTextField(
+                      controller: locationController,
+                      label: 'Point',
+                      validator: (value) => value?.isEmpty ?? true
+                          ? 'Please enter a point'
+                          : null,
+                    ),
+                    SizedBox(height: 16.h),
+                    // 4. Home Address
+                    _buildLabeledTextField(
+                      controller: residentialController,
+                      label: 'Home Address',
+                      maxLines: 2,
+                    ),
+                    SizedBox(height: 16.h),
+                    // 5. Adhar
                     _buildLabeledTextField(
                       controller: adharController,
                       label: 'Adhar Card (Optional)',
-                      hint: 'Enter Adhar Card Number',
                     ),
                     SizedBox(height: 16.h),
+                    // 6. Phone Number
                     _buildLabeledTextField(
-                      controller: locationController,
-                      label: 'Location (Optional)',
-                      hint: 'Enter Location',
+                      controller: phoneController,
+                      label: 'Phone Number (Optional)',
+                      keyboardType: TextInputType.phone,
                     ),
                   ],
                 ),
@@ -316,27 +379,32 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 onPressed: () {
                   if (formKey.currentState?.validate() ?? false) {
                     final updatedEmployee = Employee(
-                      id: idController.text.trim().isEmpty
-                          ? null
-                          : idController.text.trim(),
                       name: nameController.text.trim(),
-                      role: roleController.text.trim(),
                       monthlySalary: CurrencyInputFormatter.parseAmount(
                           salaryController.text),
+                      pointSalary: CurrencyInputFormatter.parseAmount(
+                          pointSalaryController.text),
                       adharCard: adharController.text.trim().isEmpty
                           ? null
                           : adharController.text.trim(),
-                      location: locationController.text.trim().isEmpty
-                          ? null
-                          : locationController.text.trim(),
+                      location: locationController.text.trim(),
+                      residentialAddress:
+                          residentialController.text.trim().isEmpty
+                              ? null
+                              : residentialController.text.trim(),
                       photoPath: selectedPhotoPath,
+                      phoneNumber: phoneController.text.trim().isEmpty
+                          ? null
+                          : phoneController.text.trim(),
                     );
                     EmployeeService().updateEmployee(employee, updatedEmployee);
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                          content: Text(
-                              'Updated employee: ${updatedEmployee.name}')),
+                        content:
+                            Text('Updated employee: ${updatedEmployee.name}'),
+                        backgroundColor: Colors.green.shade400,
+                      ),
                     );
                   }
                 },
@@ -346,6 +414,173 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
           );
         },
       ),
+    );
+  }
+
+  void _showEmployeeDetailDialog(BuildContext context, Employee employee) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Container(
+          width: 0.9.sw, // Acceptable width for ID card feel
+          padding: EdgeInsets.all(20.r),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top Section: Horizontal Layout
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left Side: Image + ID
+                  Column(
+                    children: [
+                      Container(
+                        width: 90.r,
+                        height: 90.r,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey.shade200,
+                          border: Border.all(
+                            color: AppTheme.primaryColor.withOpacity(0.2),
+                            width: 2.w,
+                          ),
+                        ),
+                        child: ClipOval(
+                          child: employee.photoPath != null
+                              ? Image.file(
+                                  File(employee.photoPath!),
+                                  fit: BoxFit.cover,
+                                  gaplessPlayback: true,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Icon(Icons.person,
+                                          size: 50.sp, color: Colors.grey),
+                                )
+                              : Icon(Icons.person,
+                                  size: 50.sp, color: Colors.grey),
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                    ],
+                  ),
+                  SizedBox(width: 20.w),
+                  // Right Side: Info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          employee.name,
+                          style: TextStyle(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        _buildCompactDetailRow(
+                            Icons.location_on_outlined,
+                            employee.location?.isNotEmpty == true
+                                ? employee.location!
+                                : 'Point N/A'),
+                        SizedBox(height: 8.h),
+                        _buildCompactDetailRow(
+                            Icons.home_outlined,
+                            employee.residentialAddress?.isNotEmpty == true
+                                ? employee.residentialAddress!
+                                : 'Address N/A'),
+                        SizedBox(height: 8.h),
+                        _buildCompactDetailRow(
+                            Icons.badge_outlined,
+                            employee.adharCard?.isNotEmpty == true
+                                ? employee.adharCard!
+                                : 'Adhar N/A'),
+                        SizedBox(height: 8.h),
+                        _buildCompactDetailRow(
+                            Icons.phone_outlined,
+                            employee.phoneNumber?.isNotEmpty == true
+                                ? employee.phoneNumber!
+                                : 'Phone N/A'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20.h),
+              Divider(color: Colors.grey.shade200),
+              SizedBox(height: 12.h),
+              // Bottom Section: Salary
+              Column(
+                children: [
+                  Text(
+                    'Monthly Salary',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    '₹${NumberFormat('#,##0').format(employee.monthlySalary)}',
+                    style: TextStyle(
+                      fontSize: 28.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade700,
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  Text(
+                    'Point Salary: ₹${NumberFormat('#,##0').format(employee.pointSalary)}',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.h),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.grey.shade600,
+                  ),
+                  child: const Text('Close'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactDetailRow(IconData icon, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16.sp, color: AppTheme.textSecondary),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: AppTheme.textPrimary,
+              height: 1.2,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -386,6 +621,8 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
+    bool isNumber = false, // Added parameter
+    int maxLines = 1, // Added parameter
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,8 +638,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         SizedBox(height: 8.h),
         TextFormField(
           controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
+          keyboardType: isNumber ? TextInputType.number : keyboardType,
+          inputFormatters:
+              isNumber ? [CurrencyInputFormatter()] : inputFormatters,
+          maxLines: maxLines,
           style: TextStyle(
               fontSize: 14.sp, color: Colors.black87), // Lighter black
           validator: validator,
@@ -445,9 +684,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 ? allEmployees
                 : allEmployees.where((employee) {
                     final query = _searchQuery.toLowerCase();
-                    return employee.name.toLowerCase().contains(query) ||
-                        (employee.id?.toLowerCase().contains(query) ?? false) ||
-                        employee.role.toLowerCase().contains(query);
+                    return employee.name.toLowerCase().contains(query);
                   }).toList();
 
             return SingleChildScrollView(
@@ -492,7 +729,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                     },
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.search),
-                      hintText: 'Search employees by name, ID, or role',
+                      hintText: 'Search employees by name or ID',
                       contentPadding: EdgeInsets.symmetric(
                           vertical: 12.h, horizontal: 16.w),
                       border: OutlineInputBorder(
@@ -576,11 +813,6 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                         style: TextStyle(
                             fontSize: 16.sp, fontWeight: FontWeight.bold),
                       ),
-                      if (employee.id != null && employee.id!.isNotEmpty)
-                        Text(
-                          'ID: ${employee.id}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
                     ],
                   ),
                 ),
@@ -604,61 +836,58 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(Icons.business_outlined,
-                    size: 16.sp, color: AppTheme.textSecondary),
-                SizedBox(width: 8.w),
-                Text(
-                  employee.role,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Role Badge (e.g., HR) - Hardcoded for now based on image
-            if (employee.role.contains('HR'))
-              Container(
-                margin: EdgeInsets.only(top: 4.h, bottom: 12.h),
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: Colors.purple.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-                child: Text(
-                  'HR',
-                  style: TextStyle(
-                      fontSize: 10.sp,
-                      color: Colors.purple,
-                      fontWeight: FontWeight.bold),
+            if (employee.location != null && employee.location!.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: Row(
+                  children: [
+                    Icon(Icons.location_on_outlined,
+                        size: 16.sp, color: AppTheme.textSecondary),
+                    SizedBox(width: 8.w),
+                    Text(
+                      employee.location!,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
                 ),
               ),
-
-            if (!employee.role.contains('HR')) SizedBox(height: 12.h),
+            SizedBox(height: 12.h),
             Divider(color: Colors.grey.shade100),
             SizedBox(height: 8.h),
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text:
-                        '₹${NumberFormat('#,##0').format(employee.monthlySalary)}',
-                    style: TextStyle(
-                      color: Colors.green.shade700,
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text:
+                            '₹${NumberFormat('#,##0').format(employee.monthlySalary)}',
+                        style: TextStyle(
+                          color: Colors.green.shade700,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' / month',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ],
                   ),
-                  TextSpan(
-                    text: ' / month',
-                    style: TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 14.sp,
-                    ),
+                ),
+                TextButton(
+                  onPressed: () => _showEmployeeDetailDialog(context, employee),
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    foregroundColor: AppTheme.primaryColor,
                   ),
-                ],
-              ),
+                  child: const Text('View'),
+                ),
+              ],
             ),
           ],
         ),

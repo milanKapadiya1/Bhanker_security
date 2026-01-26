@@ -1,10 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
-import 'package:flutter/services.dart' show rootBundle;
+// import 'package:file_picker/file_picker.dart'; // Removed file_picker
+import 'package:permission_handler/permission_handler.dart'; // import permission_handler
 import '../theme/app_theme.dart';
 import '../widgets/app_drawer.dart';
 import '../services/salary_service.dart';
@@ -83,30 +85,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
               cellHeight: 30,
               columnWidths: {
                 0: const pw.IntrinsicColumnWidth(), // Name
-                1: const pw.IntrinsicColumnWidth(), // ID
-                2: const pw.IntrinsicColumnWidth(), // Days
-                3: const pw.IntrinsicColumnWidth(), // Per Day
-                4: const pw.IntrinsicColumnWidth(), // Monthly
-                5: const pw.FlexColumnWidth(), // Deductions
-                6: const pw.IntrinsicColumnWidth(), // Gross Salary
+                1: const pw.IntrinsicColumnWidth(), // Days
+                2: const pw.IntrinsicColumnWidth(), // Per Day
+                3: const pw.IntrinsicColumnWidth(), // Monthly
+                4: const pw.FlexColumnWidth(), // Deductions
+                5: const pw.IntrinsicColumnWidth(), // Gross Salary
+                6: const pw.IntrinsicColumnWidth(), // Profit
               },
               cellAlignments: {
                 0: pw.Alignment.centerLeft,
-                1: pw.Alignment.centerLeft,
-                2: pw.Alignment.center,
+                1: pw.Alignment.center,
+                2: pw.Alignment.centerRight,
                 3: pw.Alignment.centerRight,
-                4: pw.Alignment.centerRight,
-                5: pw.Alignment.centerLeft, // Deductions
-                6: pw.Alignment.centerRight, // Gross Salary
+                4: pw.Alignment.centerLeft, // Deductions
+                5: pw.Alignment.centerRight, // Gross Salary
+                6: pw.Alignment.centerRight, // Profit
               },
               headers: [
                 'Name',
-                'ID',
                 'Days',
                 'Per Day',
                 'Monthly',
                 'Deductions',
-                'Gross Salary'
+                'Gross Salary',
+                'Profit'
               ],
               data: items.map((item) {
                 // Format deductions string
@@ -121,12 +123,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
                 return [
                   item.employeeName,
-                  item.employeeId,
                   '${item.presentDays}/${item.totalDays}',
                   NumberFormat('#,##0').format(item.perDayAmount),
                   NumberFormat('#,##0').format(item.monthlySalary),
                   deductionStr, // New Column Data
                   NumberFormat('#,##0').format(item.calculatedSalary),
+                  '+${NumberFormat('#,##0').format(item.profit)}',
                 ];
               }).toList(),
             ),
@@ -145,10 +147,82 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'Salary_Report_$month.pdf',
-    );
+    final bytes = await pdf.save(); // Get PDF bytes
+
+    // final bytes = await pdf.save(); // Already defined above
+    String? finalPath;
+
+    try {
+      Directory? directory;
+      bool permissionGranted = false;
+
+      // 1. Try Public "Downloads" folder (Android Only)
+      if (Platform.isAndroid) {
+        // Attempt to request permissions
+        // Note: manageExternalStorage request opens settings page,
+        // if user denies or ignores, we must have a fallback.
+        if (await Permission.storage.request().isGranted ||
+            await Permission.manageExternalStorage.request().isGranted) {
+          permissionGranted = true;
+        }
+
+        // Even if permission is 'denied', on Android 10+ using specific paths might work.
+        // But to be safe, we check if we can write.
+
+        if (permissionGranted) {
+          directory = Directory('/storage/emulated/0/Download');
+          if (!await directory.exists()) {
+            directory = null; // Path invalid
+          }
+        }
+      }
+
+      // 2. If Public failed or iOS -> Use App Documents
+      if (directory == null) {
+        if (Platform.isAndroid) {
+          directory =
+              await getExternalStorageDirectory(); // App-specific external (Android/data/...)
+        } else {
+          directory = await getApplicationDocumentsDirectory(); // iOS Documents
+        }
+      }
+
+      if (directory != null) {
+        final filePath = '${directory.path}/Salary_Report_$month.pdf';
+        final file = File(filePath);
+        await file.writeAsBytes(bytes);
+        finalPath = filePath;
+      } else {
+        throw Exception('Could not determine ANY save directory.');
+      }
+
+      // Success Message
+      if (context.mounted && finalPath != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Saved PDF to: $finalPath'), // Show full path so user knows where it is
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 7),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save PDF. Error: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -280,45 +354,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           child: ListTile(
                             contentPadding: EdgeInsets.symmetric(
                                 horizontal: 16.w, vertical: 8.h),
-                            title: Row(
-                              children: [
-                                Text(
-                                  item.employeeName,
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                SizedBox(width: 8.w),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 6.w, vertical: 2.h),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade200,
-                                    borderRadius: BorderRadius.circular(4.r),
-                                  ),
-                                  child: Text(
-                                    item.employeeRole,
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: AppTheme.textSecondary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            title: Text(
+                              item.employeeName,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(height: 4.h),
-                                Text(
-                                  'ID: ${item.employeeId}',
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                ),
                                 Text(
                                   '${item.presentDays}/${item.totalDays} days',
                                   style: TextStyle(
@@ -331,6 +377,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                                Text(
+                                  'Profit: +₹${NumberFormat('#,##0').format(item.profit)}',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.green.shade700,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 if (item.wc > 0 ||
